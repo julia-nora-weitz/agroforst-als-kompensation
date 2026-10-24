@@ -269,6 +269,22 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
   .nav .btn{flex:1 1 100%}
   .kpi .v{font-size:22px}
 }
+
+/* Kopfbereich ab Laptopbreite: grosse Titelzeile, Erlaeuterung und Rechengrundlage nebeneinander */
+@media (min-width:900px){
+  .wrap{padding-top:36px}
+  header.top{align-items:center;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:22px}
+  .brandline{font-size:12px;letter-spacing:.16em}
+  h1{font-size:40px;line-height:1.1;margin-top:10px;letter-spacing:-.01em}
+  h1 .tsep{display:none}
+  h1 .tsub{display:block;font-size:22px;line-height:1.3;color:var(--ink-2);margin-top:8px;letter-spacing:0}
+  .top-r{align-items:flex-end;gap:12px}
+  .standnote{font-size:12px}
+  .intro-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:stretch;margin-top:0}
+  .intro-grid .lede{margin-top:0;max-width:none;font-size:14px;line-height:1.6;color:var(--ink-2);align-self:center}
+  .intro-grid .scope{margin-top:0;max-width:none;font-size:13px;padding:12px 16px}
+  .bar{margin-top:24px}
+}
 </style>
 <div class="wrap">
   <header class="top no-print">
@@ -284,8 +300,10 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
       <div class="standnote" id="standnote"></div>
     </div>
   </header>
-  <div class="lede no-print" id="lede"></div>
-  <div class="scope no-print" id="scope"></div>
+  <div class="intro-grid no-print">
+    <div class="lede" id="lede"></div>
+    <div class="scope" id="scope"></div>
+  </div>
   <div class="bar no-print"><i id="progress" style="width:0%"></i></div>
 
   <div class="shell">
@@ -1425,7 +1443,7 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     document.title = T("Agroforst Vorprüfung","Agroforestry pre-check");
     function set(id, html){ var n = document.getElementById(id); if(n) n.innerHTML = html; }
     set("brandline", T("Entscheidungswerkzeug","Decision tool"));
-    set("title", T("Agroforst als Kompensation: Vorprüfung für Kommunen","Agroforestry as compensation: pre-check for municipalities"));
+    set("title", T("Agroforst als Kompensation<span class=\"tsep\">: </span><span class=\"tsub\">Vorprüfung für Kommunen</span>","Agroforestry as compensation<span class=\"tsep\">: </span><span class=\"tsub\">pre-check for municipalities</span>"));
     set("standnote", T("Oktober 2026<br>Rheinland-Pfalz","October 2026<br>Rhineland-Palatinate"));
     set("lede", T("In 5 Schritten zur Einschätzung, ob eine Kommune ein Agroforstsystem über produktionsintegrierte Kompensation anstoßen und finanzieren kann. Sie können zwischen den Schritten wechseln; die Eingaben bleiben erhalten, solange diese Seite geöffnet ist. Gespeichert wird nichts. Am Ende laden Sie das Ergebnisblatt als PDF herunter.",
       "In 5 steps to an assessment of whether a municipality can initiate and finance an agroforestry system through production-integrated compensation. You can move between the steps; your entries are kept for as long as this page stays open. Nothing is stored. At the end you download the result sheet as a PDF."));
