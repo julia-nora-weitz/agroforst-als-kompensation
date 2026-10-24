@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agroforst Vorprüfung</title>
+<style>
+/* Layout: Schrittleiste links, eine Frage-Spalte, Hinweise direkt unter der Frage; stapelt unter 780px.
+   Tokens: warmes Papier, Waldtinte, ein frischer Akzent fuer alles Bedienbare, 2 Signalstufen (Hinweis / Achtung). */
+:root{
+  --paper:#FAF9F6; --surface:#FFFFFF; --tint:#F2F6F3; --sunk:#EFF1EE;
+  --ink:#19211C; --ink-2:#47544C; --ink-3:#78847C;
+  --line:#DDE3DE; --line-2:#ECEFEC;
+  --accent:#1F7A52; --accent-2:#E8F4ED; --accent-ink:#FFFFFF;
+  --note:#8A5E0B; --note-bg:#FCF4E3; --note-line:#E0B861;
+  --warn:#9E3B2C; --warn-bg:#FBEEEB; --warn-line:#D9907F;
+  --role-a:#2E6A4E; --role-b:#1F6085; --role-c:#A24A33; --role-d:#8A6B16; --role-e:#5F4B8B;
+  --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --r:7px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121714; --surface:#1A201C; --tint:#212924; --sunk:#232B26;
+    --ink:#E9EEEA; --ink-2:#B5C0B9; --ink-3:#8B968E;
+    --line:#2D352F; --line-2:#262D28;
+    --accent:#58BC8B; --accent-2:#1C2E25; --accent-ink:#0E1512;
+    --note:#E0B262; --note-bg:#2B2416; --note-line:#6B5520;
+    --warn:#E8907F; --warn-bg:#2C1C19; --warn-line:#6E3A30;
+    --role-a:#6FBF92; --role-b:#6AADD6; --role-c:#E0907A; --role-d:#D3B358; --role-e:#A795D8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121714; --surface:#1A201C; --tint:#212924; --sunk:#232B26;
+  --ink:#E9EEEA; --ink-2:#B5C0B9; --ink-3:#8B968E;
+  --line:#2D352F; --line-2:#262D28;
+  --accent:#58BC8B; --accent-2:#1C2E25; --accent-ink:#0E1512;
+  --note:#E0B262; --note-bg:#2B2416; --note-line:#6B5520;
+  --warn:#E8907F; --warn-bg:#2C1C19; --warn-line:#6E3A30;
+  --role-a:#6FBF92; --role-b:#6AADD6; --role-c:#E0907A; --role-d:#D3B358; --role-e:#A795D8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px;padding-block:22px 44px}
+
+header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:12px}
+.brandline{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-family:var(--serif);font-size:26px;line-height:1.18;margin:5px 0 0;font-weight:400;text-wrap:balance}
+.standnote{font-size:11px;color:var(--ink-3);text-align:right;min-width:92px;line-height:1.45}
+.lede{font-size:13px;color:var(--ink-2);margin-top:8px;max-width:72ch}
+
+.scope{font-size:12.5px;color:var(--ink-2);margin-top:10px;max-width:84ch;padding:8px 12px;border-left:3px solid var(--accent);
+  background:var(--accent-2);border-radius:0 5px 5px 0;line-height:1.45}
+.scope b{color:var(--ink);font-weight:650}
+.ph{background:var(--note-bg);color:var(--note);border:1px dashed var(--note-line);border-radius:3px;padding:0 4px;font-style:normal}
+.jump{font:inherit;font-size:12px;font-weight:650;color:var(--accent);background:none;border:0;padding:0;margin-left:6px;
+  cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:4px;flex-wrap:wrap}
+.seg label{display:flex;align-items:center;gap:7px;padding:7px 12px;font-size:13px;color:var(--ink-2);cursor:pointer;background:var(--surface)}
+.seg label+label{border-left:1px solid var(--line)}
+.seg input{accent-color:var(--accent);margin:0}
+.seg label:has(input:checked){background:var(--accent-2);color:var(--ink);font-weight:650}
+.rolle{margin-top:10px}
+.divider{margin:24px 0 0;border-top:1px solid var(--line)}
+.bar{height:4px;background:var(--sunk);border-radius:99px;overflow:hidden;margin:16px 0 0}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+
+.shell{display:grid;grid-template-columns:180px minmax(0,1fr);gap:32px;margin-top:22px;align-items:start}
+@media (max-width:780px){.shell{grid-template-columns:minmax(0,1fr);gap:14px}}
+.rail{display:flex;flex-direction:column;gap:1px;position:sticky;top:10px}
+@media (max-width:780px){.rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}}
+.railitem{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:5px;background:none;border:0;font:inherit;
+  font-size:13px;color:var(--ink-3);text-align:left;cursor:pointer;width:100%;white-space:nowrap}
+.railitem:hover{background:var(--tint);color:var(--ink-2)}
+.railitem .b{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;
+  font-weight:700;border:1px solid var(--line);color:var(--ink-3);background:var(--surface)}
+.railitem[aria-current="true"]{color:var(--ink);font-weight:650}
+.railitem[aria-current="true"] .b{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.railitem[data-seen="1"] .b{border-color:var(--accent);color:var(--accent)}
+.railitem[data-seen="1"][aria-current="true"] .b{color:var(--accent-ink)}
+.railitem .dot{width:6px;height:6px;border-radius:50%;background:var(--note);margin-left:auto;flex:none}
+@media (max-width:780px){.railitem .t{display:none}.railitem{width:auto;padding:6px}.railitem .dot{display:none}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;
+  box-shadow:0 1px 2px rgba(0,0,0,.03)}
+@media (max-width:440px){.panel{padding:18px 15px}}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h2{font-family:var(--serif);font-weight:400;font-size:23px;line-height:1.25;margin:8px 0 0;text-wrap:balance}
+.intro{font-size:13.5px;color:var(--ink-2);margin:9px 0 0;max-width:66ch}
+
+fieldset{border:0;padding:0;margin:22px 0 0}
+legend{font-size:14.5px;font-weight:650;color:var(--ink);padding:0;margin-bottom:8px;line-height:1.35}
+.hint{font-size:12px;color:var(--ink-3);margin:-3px 0 9px;max-width:66ch}
+.hint a{color:var(--accent)}
+.opts{display:flex;flex-direction:column;gap:6px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+@media (max-width:620px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:5px;
+  cursor:pointer;background:var(--surface);font-size:13.5px;color:var(--ink-2);transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--accent)}
+.opt input{margin:2px 0 0;accent-color:var(--accent);flex:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-2);color:var(--ink)}
+.opt .sub{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.opt:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+
+.flag{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-radius:5px;font-size:13px;line-height:1.45;
+  margin:8px 0 0;border-left:3px solid}
+.flag .tag{font-weight:700;flex:none}
+.flag.note{background:var(--note-bg);border-color:var(--note-line);color:var(--ink-2)}
+.flag.note .tag{color:var(--note)}
+.flag.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--ink-2)}
+.flag.warn .tag{color:var(--warn)}
+.flag ul{margin:4px 0 0;padding-left:17px}
+.flag li{margin-bottom:3px}
+
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:13px;margin-top:14px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2);font-weight:650;min-width:0}
+label.f .u{font-weight:400;color:var(--ink-3)}
+input[type=number],input[type=text],select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);
+  border-radius:5px;background:var(--surface);color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
+textarea{min-height:84px;resize:vertical;line-height:1.45}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+
+.section-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  margin:24px 0 2px;padding-top:16px;border-top:1px solid var(--line)}
+
+.rtable{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.rtable th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  padding:0 8px 6px 0;border-bottom:1px solid var(--line)}
+.rtable td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
+.rtable td.n{text-align:right;color:var(--ink);font-weight:650;white-space:nowrap}
+.rtable tr.sum td{border-top:1px solid var(--ink);border-bottom:0;color:var(--ink);font-weight:700;padding-top:9px}
+.rtable caption{caption-side:top;text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;padding-bottom:4px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;padding:5px 11px;border-radius:99px;border:1px solid}
+.chip.ok{color:var(--accent);border-color:var(--accent);background:var(--accent-2)}
+.chip.note{color:var(--note);border-color:var(--note-line);background:var(--note-bg)}
+.chip.warn{color:var(--warn);border-color:var(--warn-line);background:var(--warn-bg)}
+
+.cut{margin-top:12px;background:var(--tint);border:1px solid var(--line);border-radius:5px;padding:12px 13px}
+.cut svg{display:block;width:100%;height:auto;max-width:100%}
+
+/* Ablaufgrafik */
+.flowwrap{margin-top:14px}
+.flowhead{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin:14px 0 8px}
+.flowhead .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.flowhead .v{font-size:13px;font-weight:650;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:860px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.cards{grid-template-columns:minmax(0,1fr);gap:14px}}
+.card{border:1px solid var(--line);border-radius:5px;padding:11px 12px;background:var(--surface);position:relative;min-width:0}
+.card .no{position:absolute;top:8px;right:11px;font-size:17px;font-weight:700;color:var(--line)}
+.card{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start;justify-items:start}
+@media (max-width:460px){.card{grid-row:auto;grid-template-rows:none}}
+.card>.who{align-self:start}
+.card h4{font-size:13.5px;margin:0 0 5px;font-weight:650;line-height:1.25}
+.card .who{display:inline-block;font-size:10.5px;font-weight:700;color:#fff;padding:3px 8px;border-radius:99px;
+  line-height:1.3;margin:0 24px 8px 0}
+.card .txt{font-size:11.5px;color:var(--ink-3);line-height:1.4}
+.card.here{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.here::after{content:attr(data-here);position:absolute;bottom:-9px;left:11px;font-size:9.5px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:2px 7px;border-radius:99px}
+.w-a{background:var(--role-a)} .w-b{background:var(--role-b)} .w-c{background:var(--role-c)}
+.w-d{background:var(--role-d)} .w-e{background:var(--role-e)}
+.flownote{font-size:11.5px;color:var(--ink-3);margin-top:12px;font-style:italic}
+.erloes{display:flex;gap:11px;align-items:flex-start;margin-top:12px;padding:11px 13px;border-radius:5px;
+  border:1px dashed var(--line);background:var(--tint);font-size:12.5px;color:var(--ink-2)}
+.erloes b{color:var(--ink)}
+
+ul.plain{list-style:none;margin:10px 0 0;padding:0}
+ul.plain li{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:7px 0;border-bottom:1px solid var(--line-2);
+  font-size:13px;color:var(--ink-2)}
+ul.plain li .mark{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:7px}
+ul.plain li b{color:var(--ink);font-weight:650}
+
+.nav{display:flex;gap:10px;align-items:center;margin-top:20px;flex-wrap:wrap}
+button.btn{font:inherit;font-size:14px;font-weight:650;padding:10px 20px;border-radius:5px;cursor:pointer;
+  border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);transition:filter .12s}
+button.btn:hover{filter:brightness(1.08)}
+button.btn.ghost{background:none;color:var(--ink-2);border-color:var(--line)}
+button.btn.ghost:hover{border-color:var(--ink-3);color:var(--ink);filter:none}
+button.btn.small{font-size:12.5px;padding:7px 13px}
+button.btn:focus-visible,.railitem:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spacer{flex:1}
+.counter{font-size:12px;color:var(--ink-3)}
+
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+@media (max-width:440px){.sheet{padding:17px 15px}}
+.sheet h3{font-family:var(--serif);font-weight:400;font-size:18px;margin:22px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.kv{display:grid;grid-template-columns:154px minmax(0,1fr);gap:5px 14px;font-size:13.5px;margin-top:9px}
+@media (max-width:520px){.kv{grid-template-columns:minmax(0,1fr)}.kv dt{margin-top:6px}}
+.kv dt{color:var(--ink-3);font-size:12px;padding-top:2px}
+.kv dd{margin:0;color:var(--ink-2)}
+.sheetfoot{margin-top:20px;padding-top:11px;border-top:1px solid var(--ink);font-size:11px;color:var(--ink-3);line-height:1.55}
+.mailbox{margin-top:22px;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;background:var(--surface)}
+.mailbox h3{font-family:var(--serif);font-weight:400;font-size:17px;margin:0 0 4px}
+.mailtext{margin-top:11px;white-space:pre-wrap;font-size:12.5px;line-height:1.55;color:var(--ink-2);
+  background:var(--tint);border:1px solid var(--line);border-radius:5px;padding:13px 14px;max-height:300px;overflow:auto}
+footer.pagefoot{margin-top:24px;padding-top:11px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-3);line-height:1.55}
+
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+.panel,.sheet{animation:in .22s ease}
+@keyframes in{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.sheetmeta{font-size:11px;color:var(--ink-3);text-align:right;line-height:1.5;white-space:nowrap}
+@media (max-width:520px){.sheethead{flex-direction:column;gap:8px}.sheetmeta{text-align:left;white-space:normal}}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+@media (max-width:620px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:5px;padding:11px 13px;background:var(--tint);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.kpi .v{font-family:var(--serif);font-size:24px;line-height:1.2;color:var(--ink)}
+.kpi .s{font-size:11.5px;color:var(--ink-3);line-height:1.4}
+.tblwrap{overflow-x:auto}
+.rtable th.r,.rtable td.r{text-align:right;white-space:nowrap}
+.savebox{margin:0 0 14px}
+.savetext{min-width:0}
+.sheetfoot p{margin:0 0 6px}
+.sheetfoot a,footer.pagefoot a{color:var(--accent)}
+footer.pagefoot p{margin:0 0 6px}
+
+@page{size:A4;margin:14mm 16mm}
+@media print{
+  html,body{background:#fff !important;color:#000}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none !important}
+  .wrap{max-width:none;padding:0}
+  .shell{display:block;margin:0}
+  .sheet{border:0;padding:0;box-shadow:none;animation:none;background:#fff}
+  .sheet h3{break-after:avoid}
+  .kv>*,ul.plain li,.rtable tr,.kpi,.flag{break-inside:avoid}
+  .kpi{background:#fff}
+  .sheetfoot a{color:#1F7A52}
+}
+
+/* Update Oktober 2026: Umschalter, Handy-Layout, Maßstab-Zeile */
+.top-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+.langsw{display:inline-flex;border:1px solid var(--accent);border-radius:99px;overflow:hidden;background:var(--surface)}
+.langsw button{font:inherit;font-size:13px;font-weight:700;letter-spacing:.06em;padding:6px 14px;border:0;background:none;color:var(--accent);cursor:pointer;min-width:44px}
+.langsw button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.langsw button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.top>div:first-child{min-width:0}
+h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.kpi,.card,.mailtext,.sheet,.panel,label.f{overflow-wrap:anywhere}
+.flag .ftxt{min-width:0}
+.flag .tag{max-width:40%}
+.kv dt.hl,.kv dd.hl{background:var(--accent-2);color:var(--ink)}
+.kv dt.hl{font-weight:700;color:var(--accent);padding:4px 8px;border-radius:4px 0 0 4px}
+.kv dd.hl{padding:4px 8px;border-radius:0 4px 4px 0;font-weight:600}
+@media (max-width:520px){.kv dt.hl{border-radius:4px 4px 0 0;padding-bottom:0}.kv dd.hl{border-radius:0 0 4px 4px;padding-top:2px}}
+.rtable caption{display:table-caption}
+.mailtext{overflow-wrap:anywhere}
+@media (max-width:560px){
+  .top-r .standnote{display:none}
+  .tblwrap{overflow-x:visible}
+  table.rtable.stack,table.rtable.stack tbody,table.rtable.stack tr,table.rtable.stack td{display:block;width:100%}
+  table.rtable.stack caption{display:block;width:100%;white-space:normal}
+  table.rtable.stack thead{position:absolute;left:-9999px}
+  table.rtable.stack tr{border-bottom:1px solid var(--line);padding:6px 0}
+  table.rtable.stack td{border:0;padding:2px 0;text-align:left !important;white-space:normal}
+  table.rtable.stack td.r::before,table.rtable.stack td[data-l]::before{content:attr(data-l)": ";color:var(--ink-3);font-size:11px}
+  table.rtable.stack td:first-child{font-weight:700;color:var(--ink)}
+  table.rtable.stack td:first-child::before{content:""}
+  table.rtable.stack td.e{display:none}
+  .rtable td.n{white-space:normal}
+  .nav .btn{flex:1 1 100%}
+  .kpi .v{font-size:22px}
+}
+</style>
+<div class="wrap">
+  <header class="top no-print">
+    <div>
+      <div class="brandline" id="brandline"></div>
+      <h1 id="title"></h1>
+    </div>
+    <div class="top-r">
+      <div class="langsw" role="group" aria-label="Sprache / Language">
+        <button type="button" id="lang-de" aria-pressed="true" lang="de">DE</button>
+        <button type="button" id="lang-en" aria-pressed="false" lang="en">EN</button>
+      </div>
+      <div class="standnote" id="standnote"></div>
+    </div>
+  </header>
+  <div class="lede no-print" id="lede"></div>
+  <div class="scope no-print" id="scope"></div>
+  <div class="bar no-print"><i id="progress" style="width:0%"></i></div>
+
+  <div class="shell">
+    <nav class="rail no-print" id="rail"></nav>
+    <main id="main"></main>
+  </div>
+
+  <footer class="pagefoot no-print" id="pagefoot"></footer>
+</div>
+
+<script src="jspdf.umd.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------- Sprache */
+  var LANG = "de";
+  function T(d,e){ return LANG==="en" ? e : d; }
+  function P(a){ return LANG==="en" ? a[1] : a[0]; }
+  try{
+    var q = (location.search||"") + " " + (location.hash||"");
+    if(/lang=en|#en\b/i.test(q)) LANG = "en";
+  }catch(e){}
+
+  var nf0, nf1, nf2, nfk;
+  function setFormats(){
+    var loc = LANG==="en" ? "en-GB" : "de-DE";
+    nf0 = new Intl.NumberFormat(loc,{maximumFractionDigits:0});
+    nf1 = new Intl.NumberFormat(loc,{minimumFractionDigits:1,maximumFractionDigits:1});
+    nf2 = new Intl.NumberFormat(loc,{minimumFractionDigits:2,maximumFractionDigits:2});
+    nfk = new Intl.NumberFormat(loc,{maximumFractionDigits:1});
+  }
+  setFormats();
+
+  /* ---------------------------------------------------------------- Daten */
+  var AUSGANG = {
+    acker:      {label:["Acker","Arable land"], wert:6, spanne:["Richtwert 6 Punkte","guide value 6 points"]},
+    gruenGering:{label:["Grünland, geringwertig","Grassland, low value"], wert:8, spanne:["Spanne 8 bis 11, vorbelegt mit 8","range 8 to 11, preset to 8"]},
+    gruenHoch:  {label:["Grünland, hochwertig","Grassland, high value"], wert:14, spanne:["Spanne 12 bis 18, vorbelegt mit 14","range 12 to 18, preset to 14"]},
+    dauer:      {label:["Dauerkultur","Permanent crop"], wert:null, spanne:["Ausgangswert selbst eintragen","enter the initial value yourself"]}
+  };
+  var SAUMWERT = 16;
+  var PREIS = {min:0.5, mid:1.5, max:3};
+  var KOSTEN = {anlage:9000, voll20:28000};
+  var SAUM_OPT = [0,2,2.5,3,3.5,4,4.5,5];
+
+  var LINK_LEITFADEN = "https://mkuem.rlp.de/fileadmin/14/Themen/Naturschutz/Eingriff_und_Kompensation/Praxisleitfaden_Kompensationsbedarf_Juni_2021.pdf";
+  /* PLATZHALTER: dauerhafte Adresse des Werkzeugs eintragen, sobald das Hosting feststeht */
+  var LINK_WERKZEUG_P = ["[Link zum Werkzeug folgt]","[link to the tool to follow]"];
+  var LINK_OER3 = "https://www.agrarfoerderung-niedersachsen.de/agrarfoerderung/news/42594_%C3%96R3_-_Beibehaltung_einer_agroforstlichen_Bewirtschaftungsweise_auf_Ackerland_und_Dauergruenland";
+  var LINK_METHODE = "https://mega.nz/file/q9ghxJ6T#9iTUx7Eur67JqWTbC-4rhdu-ix2nEfdvJ_obQl_a1C4";
+  var LINK_ABSCHLUSS = "https://agroforst-info.de/infothek/abschlussarbeiten/";
+  var TITEL = "Bewertung und kommunale Initiierung von Agroforst über produktionsintegrierte Kompensation in Rheinland-Pfalz";
+  var TITEL_EN = "Assessment and municipal initiation of agroforestry through production-integrated compensation in Rhineland-Palatinate";
+
+  function fuss(){
+    if(LANG==="en") return [
+      [
+        {t:"For agroforestry systems, the biotope value list of Rhineland-Palatinate has no biotope type of its own with a fixed target value. The target values used here are the proposal of a master's thesis and are derived by analogy with hedges and tree rows. Weitz, J. (2026). "},
+        {t:TITEL, i:true},
+        {t:" ["+TITEL_EN+"] [Master's thesis, Universidade de Lisboa]. A summary is available as a "},
+        {t:"method paper", u:LINK_METHODE},
+        {t:" (in German). After submission and assessment, the full thesis will be published on the DeFAF page for "},
+        {t:"theses", u:LINK_ABSCHLUSS},
+        {t:" (in German)."}
+      ],
+      [
+        {t:"The tool replaces neither the expert assessment nor the consultation with the lower nature conservation authority, and it is not legal advice. It is a prototype with a version date. No entries are stored or transmitted."}
+      ]
+    ];
+    return [
+      [
+        {t:"Für Agroforstsysteme führt die Biotopwertliste Rheinland-Pfalz keinen eigenen Biotoptyp mit festem Zielwert. Die hier verwendeten Zielwerte sind der Vorschlag einer Masterarbeit und über eine Analogie zu Hecken und Baumreihen hergeleitet. Weitz, J. (2026). "},
+        {t:TITEL, i:true},
+        {t:" [Masterarbeit, Universidade de Lisboa]. Eine Zusammenfassung ist über ein "},
+        {t:"Methodenpapier", u:LINK_METHODE},
+        {t:" verfügbar. Nach Abgabe und Prüfung wird die vollständige Arbeit auf der DeFAF Seite für "},
+        {t:"Abschlussarbeiten", u:LINK_ABSCHLUSS},
+        {t:" veröffentlicht."}
+      ],
+      [
+        {t:"Das Werkzeug ersetzt weder die gutachterliche Bilanzierung noch die Abstimmung mit der unteren Naturschutzbehörde und ist keine Rechtsberatung. Es ist ein Prototyp mit Standdatum. Es werden keine Eingaben gespeichert oder übertragen."}
+      ]
+    ];
+  }
+  function quelleText(){
+    return LANG==="en"
+      ? "Weitz, J. (2026). " + TITEL + " [" + TITEL_EN + "] [Master's thesis, Universidade de Lisboa]. Summary (method paper, in German): " + LINK_METHODE
+      : "Weitz, J. (2026). " + TITEL + " [Masterarbeit, Universidade de Lisboa]. Zusammenfassung (Methodenpapier): " + LINK_METHODE;
+  }
+  function runsHTML(runs){
+    return runs.map(function(r){
+      var t = esc(r.t);
+      if(r.i) t = "<i>" + t + "</i>";
+      if(r.u) t = '<a href="' + r.u + '" target="_blank" rel="noopener">' + t + "</a>";
+      return t;
+    }).join("");
+  }
+  function fussHTML(){ return fuss().map(function(p){ return "<p>" + runsHTML(p) + "</p>"; }).join(""); }
+
+  var ABLAUF = [
+    {n:1, t:["Vorhaben entwickeln","Develop the project"], w:["Kommune und Bewirtschafter","Municipality and farmer"], c:"w-a", x:["Ziel, Fläche und Agroforsttyp klären","Clarify goal, site and type of agroforestry system"], here:true},
+    {n:2, t:["Vorabstimmung mit UNB","Pre-consultation with the UNB"], w:["Kommune und Bewirtschafter","Municipality and farmer"], c:"w-a", x:["Ortstermin vor der Planung, noch unverbindlich","Site visit before planning, still non-binding"], here:true},
+    {n:3, t:["Pflanzplan und Bewertung","Planting plan and assessment"], w:["Fachbüro","Specialist consultancy"], c:"w-b", x:["unter anderem Ausgangszustand kartieren","among other things, map the initial condition"]},
+    {n:4, t:["Rechtlich sichern","Secure legally"], w:["Kommune oder Bewirtschafter","Municipality or farmer"], c:"w-a", x:["Dauerhaft wirkt nur eine Dienstbarkeit im Grundbuch","Only an easement entered in the land register is permanent"]},
+    {n:5, t:["Anerkennung und Eintrag","Recognition and registration"], w:["Untere Naturschutzbehörde","Lower nature conservation authority"], c:"w-c", x:["Ökokonto im Vorgriff oder Auflage im Zulassungsbescheid","Eco-account in advance, or condition in the permit decision"]},
+    {n:6, t:["Pflanzung und Pflege","Planting and care"], w:["Landwirtschaftlicher Betrieb","Farm"], c:"w-d", x:["Jahr 0 bis 2, der arbeitsintensivste Abschnitt","Years 0 to 2, the most labour-intensive phase"]},
+    {n:7, t:["Entwicklungsnachweis","Proof of development"], w:["Betrieb an die Behörde","Farm to authority"], c:"w-d", x:["nach 3 und 5 Jahren, Ausfälle nachpflanzen","after 3 and 5 years, replant losses"]},
+    {n:8, t:["Fortbestand sichern","Maintain continuity"], w:["Bewirtschafter und UNB","Farmer and UNB"], c:"w-d", x:["Die Maßnahme besteht, solange der Eingriff wirkt","The measure remains for as long as the intervention has effect"]}
+  ];
+
+  /* [Titel, Erläuterung, Kurzform für den Mailentwurf], jeweils [de, en] */
+  var FESTE_PUNKTE = [
+    [["Kein Biotoptyp für Agroforst","No biotope type for agroforestry"],
+     ["Die Biotopwertliste führt keinen Agroforst-Biotoptyp. Der Zielwert wird über eine Analogie zu Hecken und Baumreihen hergeleitet. Zu klären ist, ob die Behörde diesen Weg mitgeht.","The biotope value list contains no agroforestry biotope type. The target value is derived by analogy with hedges and tree rows. It has to be clarified whether the authority accepts this approach."],
+     ["Herleitung des Zielwerts über die Analogie zu Hecken und Baumreihen","derivation of the target value by analogy with hedges and tree rows"]],
+    [["Ausgangszustand","Initial condition"],
+     ["Welche Biotoptypen auf der Fläche kartiert werden und mit welchen Punkten, entscheidet über die gesamte Bilanz.","Which biotope types are mapped on the site, and with how many points, determines the entire balance."],
+     ["Kartierung und Bewertung des Ausgangszustands","mapping and assessment of the initial condition"]],
+    [["Zielwert und Time-Lag","Target value and time lag"],
+     ["Welcher Zielwert anerkannt wird und mit welchem Time-Lag-Faktor gerechnet wird.","Which target value is recognised and which time-lag factor is used."],
+     ["anzuerkennender Zielwert und Time-Lag-Faktor","target value to be recognised and time-lag factor"]],
+    [["Saum","Margin strip"],
+     ["Welche Saumbreite anrechenbar ist und wie der Saum angelegt sein muss.","Which margin strip width is creditable and how the margin strip has to be established."],
+     ["anrechenbare Saumbreite und Anlage des Saums","creditable margin strip width and establishment of the margin strip"]],
+    [["Bindungsdauer","Binding period"],
+     ["20 Jahre für die Maßnahme, 50 Jahre für Überhälter, und wie die Behörde die Dauerhaftigkeit bei Umtriebsnutzung bewertet. Das ist erfahrungsgemäß der erste Einwand.","20 years for the measure, 50 years for standard trees (Überhälter), and how the authority assesses permanence under rotation use. In practice this is the first objection."],
+     ["Bindungsdauer (20 Jahre, Überhälter 50 Jahre) bei Umtriebsnutzung","binding period (20 years, standard trees 50 years) under rotation use"]],
+    [["Kombination mit der Öko-Regelung 3","Combination with Eco-Scheme 3"],
+     ["Ob neben der Kompensation zusätzlich die Förderung über die Öko-Regelung 3 möglich ist, ist derzeit offen.","Whether the Eco-Scheme 3 subsidy can be claimed in addition to compensation is currently open."],
+     ["Kombinierbarkeit von Kompensation und Förderung über die Öko-Regelung 3","combinability of compensation and the Eco-Scheme 3 subsidy"]]
+  ];
+
+  /* ---------------------------------------------------------------- Zustand */
+  function leer(){
+    return {
+      gemeinde:"", ziele:[],
+      nutzung:"", wertManuell:"", offenland:"", biotop:"", verfuegbar:"", gapdzv:"",
+      eigentum:"", betrieb:"", kapazitaet:"", waerme:"",
+      mosaik:false, mehrreihig:false, a2:"keine", arten:false, gewaesser:false,
+      eingabe:"flaeche", schlag:5, anzahl:3, laenge:1200, breite:12, saum:2, timeLag:null,
+      notiz:""
+    };
+  }
+  var S = leer();
+  var step = 0, maxReached = 0;
+  function steps(){ return LANG==="en"
+    ? ["Purpose","Site","Roles","Scale","Pre-consultation","Result"]
+    : ["Anlass","Fläche","Rolle","Größenordnung","Vorabstimmung","Ergebnis"]; }
+
+  /* ---------------------------------------------------------------- Zahlen */
+  function num(v){ return nf0.format(Math.round(v)); }
+  function pc(v){ return num(v) + (LANG==="en" ? "%" : " %"); }
+  function rund(v){ var a = Math.abs(v), st = a>=100000 ? 1000 : (a>=5000 ? 100 : 10); return Math.round(v/st)*st; }
+  function eur(v){ return LANG==="en" ? "€" + nf0.format(rund(v)) : nf0.format(rund(v)) + " €"; }
+  function pEur(v){ return LANG==="en" ? "€" + nf2.format(v) : nf2.format(v) + " €"; }
+  function zahl(v){ var n = parseFloat(String(v).replace(",",".")); return isNaN(n) ? 0 : n; }
+  function m(v){ return nfk.format(v) + " m"; }
+
+  function richtwert(){ var a = AUSGANG[S.nutzung]; return a ? a.wert : null; }
+  function ausgangswert(){
+    if(!AUSGANG[S.nutzung]) return null;
+    if(String(S.wertManuell).trim()==="") return null;
+    var v = zahl(S.wertManuell);
+    return (v>=0 && v<=24) ? v : null;
+  }
+  function eigenerWert(){ var aw = ausgangswert(); return aw!==null && aw!==richtwert(); }
+  function achsenPunkte(){
+    return (S.mosaik?1:0) + (S.mehrreihig?1:0) + (S.a2==="mittel"?3:(S.a2==="alt"?6:0)) +
+           (S.arten?2:0) + (S.gewaesser?1:0);
+  }
+  function timeLagAuto(){ return S.a2==="alt" ? 1.5 : 1.2; }
+  function timeLag(){ return S.timeLag===null ? timeLagAuto() : S.timeLag; }
+
+  function calc(){
+    var B = zahl(S.breite), b = zahl(S.saum);
+    if(b*2 >= B) b = 0;
+    var schlagM2 = zahl(S.schlag)*10000, n = Math.round(zahl(S.anzahl));
+    var seite = Math.sqrt(schlagM2);
+    var L = S.eingabe==="flaeche" ? n*seite : zahl(S.laenge);
+    var fSaum = L * 2 * b;
+    var fKern = L * (B - 2*b);
+    var fGes  = L * B;
+    var deckel = S.gewaesser ? 19 : 18;
+    var ziel = Math.min(8 + achsenPunkte(), deckel);
+    var tl = timeLag();
+    var anrechenbar = ziel / tl;
+    var aw = ausgangswert();
+    var upKern = aw===null ? null : anrechenbar - aw;
+    var upSaum = aw===null ? null : SAUMWERT - aw;
+    var pKern = upKern===null ? 0 : fKern * upKern;
+    var pSaum = upSaum===null ? 0 : fSaum * upSaum;
+    var punkte = pKern + pSaum;
+    var ha = fGes/10000;
+    var k20 = ha * KOSTEN.voll20;
+    var noetigGesamt = k20 / PREIS.mid;
+    return {
+      L:L, B:B, b:b, kernB:B-2*b, fSaum:fSaum, fKern:fKern, fGes:fGes, ha:ha,
+      schlag:schlagM2, n:n, seite:seite,
+      anteil: (S.eingabe==="flaeche" && schlagM2>0) ? fGes/schlagM2 : null,
+      abstand: (S.eingabe==="flaeche" && n>0) ? seite/n - B : null,
+      ziel:ziel, deckel:deckel, tl:tl, anrechenbar:anrechenbar, aw:aw,
+      upKern:upKern, upSaum:upSaum, pKern:pKern, pSaum:pSaum, punkte:punkte,
+      positiv: aw!==null && punkte>0,
+      eMin:punkte*PREIS.min, eMid:punkte*PREIS.mid, eMax:punkte*PREIS.max,
+      kAnlage:ha*KOSTEN.anlage, k20:k20,
+      deckung: k20>0 ? (punkte*PREIS.mid)/k20 : 0,
+      deckungMin: k20>0 ? (punkte*PREIS.min)/k20 : 0,
+      deckungMax: k20>0 ? (punkte*PREIS.max)/k20 : 0,
+      noetig: fGes>0 ? noetigGesamt/fGes : 0,
+      istSchnitt: fGes>0 ? punkte/fGes : 0
+    };
+  }
+
+  /* ---------------------------------------------------------------- Hinweise */
+  function hinweise(i){
+    var out = [];
+    function note(q,t,k,mail){ out.push({q:q, art:"note", text:t, kurz:k||t, schritt:i, mail:mail||null}); }
+    function warn(q,t,k,mail){ out.push({q:q, art:"warn", text:t, kurz:k||t, schritt:i, mail:mail||null}); }
+
+    if(i===0 && S.ziele.length){
+      var cash = S.ziele.indexOf("kompensation")>=0;
+      var nurErtrag = S.ziele.every(function(z){ return z==="waerme" || z==="rohstoff"; });
+      var ertrag = S.ziele.indexOf("waerme")>=0 || S.ziele.indexOf("rohstoff")>=0;
+      if(!cash && !ertrag)
+        note("ziele",
+          T("Keines der gewählten Ziele erzeugt einen unmittelbar absehbaren Cashflow. Kurz- und mittelfristig ist die Maßnahme nur über Förderungen oder den Verkauf von Wertpunkten an Dritte finanzierbar. Prüfen Sie, ob ein eigener Kompensationsbedarf absehbar ist.",
+            "None of the selected goals generates an immediately foreseeable cash flow. In the short and medium term the measure can only be financed through subsidies or by selling value points to third parties. Check whether a compensation need of your own is foreseeable."),
+          T("Kein unmittelbarer Cashflow aus den gewählten Zielen.","No immediate cash flow from the selected goals."));
+      if(nurErtrag)
+        note("ziele",
+          T("Wenn die Maßnahme rein ertragsorientiert geplant wird und keine ökologische Vielfalt angestrebt wird, fällt die Aufwertung gering aus. In der Regel entsteht dann nur auf Acker überhaupt eine Aufwertung.",
+            "If the measure is planned purely for yield and no ecological diversity is aimed for, the uplift is small. As a rule, an uplift then arises only on arable land."),
+          T("Rein ertragsorientierte Planung bringt wenig Aufwertung.","Purely yield-oriented planning brings little uplift."));
+    }
+    if(i===1){
+      if(S.nutzung==="gruenHoch")
+        note("nutzung",
+          T("Auf hochwertigem Grünland liegt der Ausgangswert bereits nahe am erreichbaren Zielwert. Tragen Sie möglichst den kartierten Wert ein. Die Bilanz trägt dort meist nur über den Saum oder über eine zusätzliche Aufwertung der Hauptkultur.",
+            "On high-value grassland the initial value is already close to the achievable target value. Enter the mapped value if possible. The balance there is usually positive only through the margin strip or through an additional uplift of the main crop."),
+          T("Hochwertiges Grünland: Ausgangswert nahe am Zielwert.","High-value grassland: initial value close to the target value."));
+      if(S.offenland==="ja" || S.offenland==="unklar")
+        warn("offenland",
+          T("Mit der zuständigen unteren Naturschutzbehörde ist abzustimmen, ob Gehölze dem Schutzzweck entgegenstehen.",
+            "Coordinate with the competent lower nature conservation authority whether woody plants conflict with the protection purpose."),
+          T("Offenland- oder Rastvogelgebiet: Schutzzweck mit der UNB abstimmen.","Open-country or resting-bird area: coordinate the protection purpose with the UNB."));
+      if(S.biotop==="ja" || S.biotop==="unklar")
+        warn("biotop",
+          T("Gesetzlich geschütztes Biotop auf der Fläche: nur in Abstimmung mit der zuständigen unteren Naturschutzbehörde möglich.",
+            "Legally protected biotope on the site: only possible in coordination with the competent lower nature conservation authority."),
+          T("Gesetzlich geschütztes Biotop auf der Fläche.","Legally protected biotope on the site."));
+      if(S.verfuegbar==="nein")
+        warn("verfuegbar",
+          T("Ein Flächenwechsel ist bei produktionsintegrierten Maßnahmen möglich, muss aber von vornherein mitbedacht und mit der Behörde geregelt werden.",
+            "Production-integrated measures allow a change of site, but this must be considered from the start and agreed with the authority."),
+          T("Verfügbarkeit nicht für die Dauer des Eingriffs gesichert; Flächenwechsel mit der UNB regeln.","Availability not secured for the duration of the intervention; agree a change of site with the UNB."),
+          T("Die Fläche ist voraussichtlich nicht für die gesamte Dauer des Eingriffs verfügbar. Einen späteren Flächenwechsel würden wir gern von vornherein mit Ihnen regeln: Unter welchen Voraussetzungen wäre das für Sie denkbar?",
+            "The site is probably not available for the entire duration of the intervention. We would like to agree a later change of site with you from the outset: under what conditions would that be conceivable for you?"));
+      if(S.verfuegbar==="offen")
+        note("verfuegbar",
+          T("Die langfristige Verfügbarkeit ist noch zu klären. Ein Flächenwechsel ist bei produktionsintegrierten Maßnahmen möglich, sollte aber frühzeitig mit der Behörde besprochen werden.",
+            "Long-term availability still has to be clarified. A change of site is possible for production-integrated measures but should be discussed with the authority early on."),
+          T("Verfügbarkeit noch offen; Flächenwechsel frühzeitig mit der UNB besprechen.","Availability still open; discuss a change of site early with the UNB."),
+          T("Die langfristige Verfügbarkeit der Fläche ist noch in Klärung; die Möglichkeit eines Flächenwechsels würden wir gern frühzeitig mit Ihnen besprechen.",
+            "Long-term availability of the site is still being clarified; we would like to discuss the possibility of a change of site with you early on."));
+      if(S.gapdzv==="nein" || S.gapdzv==="unklar")
+        warn("gapdzv",
+          T("Vorausgesetzt werden die Agroforstdefinition der GAPDZV und die Anforderungen der Öko-Regelung 3. Ohne sie ist die Grundausprägung von 8 Punkten nicht belegt.",
+            "The agroforestry definition of the GAPDZV and the requirements of Eco-Scheme 3 are assumed. Without them the baseline value of 8 points is not substantiated."),
+          T("Anforderungen der Öko-Regelung 3 noch nicht erfüllt oder offen.","Requirements of Eco-Scheme 3 not yet met or still open."));
+    }
+    if(i===2){
+      if(S.eigentum==="dritte")
+        note("eigentum",
+          T("Der Eigentümer muss der Pflanzung zustimmen und die Sicherung mittragen. Wem die Wertpunkte zustehen, ist vertraglich zu regeln.",
+            "The owner must agree to the planting and support the legal securing. To whom the value points belong has to be settled by contract."),
+          T("Fläche eines Dritten: Zuordnung der Wertpunkte vertraglich regeln.","Land of a third party: settle the allocation of value points by contract."));
+      if(S.betrieb==="nein")
+        warn("betrieb",
+          T("Anlage, Pflege und Bewirtschaftung müssen übernommen werden. Möglich ist das auch über einen Dienstleister.",
+            "Establishment, care and management must be taken over. A service provider can also do this."),
+          T("Pflege und Bewirtschaftung sind noch nicht übernommen.","Care and management have not yet been taken over."));
+      if(S.kapazitaet==="nein")
+        note("kapazitaet",
+          T("Ohne eigene Kapazität läuft die operative Umsetzung über die Verbandsgemeinde, ein Fachbüro oder einen Agroforst-Dienstleister.",
+            "Without capacity of its own, operational implementation runs through the Verbandsgemeinde (municipal association), a specialist consultancy or an agroforestry service provider."),
+          T("Operative Umsetzung ist extern zu vergeben.","Operational implementation has to be commissioned externally."));
+      if(S.waerme==="ja" || S.waerme==="offen")
+        note("waerme",
+          T("Hackschnitzel aus dem Umtrieb können an ein kommunales Heizwerk oder ein Nahwärmenetz gehen. Allein tragen sie die Anlage nicht, sie ergänzen aber die Finanzierung über Wertpunkte.",
+            "Wood chips from the rotation can go to a municipal heating plant or a local heat network. On their own they do not finance the establishment, but they supplement the financing through value points.")+
+          (S.waerme==="offen" ? T(" Ob es in der Region einen Abnehmer gibt, lohnt sich früh zu klären."," It is worth clarifying early whether a buyer exists in the region.") : ""),
+          S.waerme==="ja" ? T("Wärmenutzung der Hackschnitzel als zusätzlicher Erlös.","Heat use of the wood chips as an additional revenue.")
+                          : T("Abnehmer für Hackschnitzel finden.","Find a buyer for the wood chips."));
+      if(S.waerme==="nein")
+        note("waerme",
+          T("Ohne Wärmenutzung sind die Wertpunkte der einzige Erlös.","Without heat use, the value points are the only revenue."),
+          T("Ohne Wärmenutzung sind die Wertpunkte der einzige Erlös.","Without heat use, the value points are the only revenue."));
+    }
+    if(i===3){
+      var c = calc();
+      if(S.saum>0)
+        note("saum",
+          T("Der Saum wird mit 16 Punkten angesetzt. Er muss so angelegt und gepflegt werden, dass sich Strukturreichtum einstellen kann; der Nutzung der Hauptkultur unterliegt er nicht mehr.",
+            "The margin strip is rated at 16 points. It must be established and managed so that structural richness can develop; it is no longer part of the main crop's use."),
+          T("Saum ist strukturreich anzulegen.","The margin strip must be established with rich structure."));
+      if(c.kernB > 25)
+        warn("masse",
+          T("Der Gehölzstreifen ist ohne Saum breiter als 25 m. Die Öko-Regelung 3 erlaubt höchstens 25 m.","Without the margin strip the woody strip is wider than 25 m. Eco-Scheme 3 allows at most 25 m."),
+          T("Gehölzstreifen breiter als 25 m.","Woody strip wider than 25 m."));
+      if(S.eingabe==="flaeche"){
+        if(c.n < 2)
+          warn("masse",T("Die Öko-Regelung 3 verlangt mindestens 2 Gehölzstreifen.","Eco-Scheme 3 requires at least 2 woody strips."),
+               T("Weniger als 2 Gehölzstreifen.","Fewer than 2 woody strips."));
+        if(c.anteil!==null && (c.anteil > 0.4 || c.anteil < 0.02))
+          warn("masse",
+            T("Der Gehölzanteil liegt bei "+pc(c.anteil*100)+" der Fläche. Die Öko-Regelung 3 verlangt 2 bis 40 %.",
+              "The woody share is "+pc(c.anteil*100)+" of the area. Eco-Scheme 3 requires 2 to 40%."),
+            T("Gehölzanteil außerhalb von 2 bis 40 %.","Woody share outside 2 to 40%."));
+        if(c.n>=2 && c.abstand!==null && (c.abstand < 20 || c.abstand > 100))
+          note("masse",
+            T("Rechnerisch liegen rund "+num(Math.max(c.abstand,0))+" m zwischen den Streifen. Die Öko-Regelung 3 verlangt 20 bis 100 m. Mit mehr oder weniger Streifen lässt sich das anpassen.",
+              "Calculated, there are about "+num(Math.max(c.abstand,0))+" m between the strips. Eco-Scheme 3 requires 20 to 100 m. You can adjust this with more or fewer strips."),
+            T("Abstand der Streifen außerhalb von 20 bis 100 m.","Strip spacing outside 20 to 100 m."));
+      }
+      if(c.aw===null)
+        warn("rechnung",
+          T("Der Ausgangswert fehlt. Tragen Sie ihn in Schritt 2 ein, sonst rechnet das Werkzeug nicht.","The initial value is missing. Enter it in step 2, otherwise the tool cannot calculate."),
+          T("Ausgangswert fehlt.","Initial value missing."));
+      else if(c.punkte <= 0)
+        warn("rechnung",
+          T("Keine Aufwertung: Die Bilanz ist negativ, das Vorhaben wäre ein Eingriff und keine Kompensationsmaßnahme. Tragen kann es nur über eine zusätzliche Aufwertung der Hauptkultur, etwa eine Grünlandaufwertung mit Bewirtschaftungsauflagen; sie ist hier nicht mitgerechnet.",
+            "No uplift: the balance is negative; the project would be an intervention, not a compensation measure. It could only be viable through an additional uplift of the main crop, for example grassland enhancement with management conditions; this is not included in the calculation."),
+          T("Keine Aufwertung: Das Vorhaben wäre ein Eingriff, keine Kompensationsmaßnahme.","No uplift: the project would be an intervention, not a compensation measure."),
+          T("Nach unserem Überschlag ergibt sich aus den Gehölzen allein keine Aufwertung. Käme eine zusätzliche Aufwertung der Hauptkultur in Betracht?",
+            "According to our rough estimate, the woody plants alone yield no uplift. Would an additional uplift of the main crop be an option?"));
+      else if(c.upKern < 0)
+        note("rechnung",
+          T("Der anrechenbare Zielwert des Gehölzkerns liegt unter dem Ausgangswert der Fläche. Die Aufwertung entsteht hier allein über den Saum.",
+            "The creditable target value of the woody core is below the initial value of the site. The uplift here arises solely from the margin strip."),
+          T("Der Gehölzkern bringt auf dieser Fläche keine Aufwertung.","The woody core brings no uplift on this site."));
+      if(c.positiv && c.deckung < 1)
+        note("rechnung",
+          T("Um die geschätzten Vollkosten im mittleren Preisfall zu decken, müsste die Aufwertung im Mittel " + nf1.format(c.noetig) +
+            " Punkte je m² erreichen; derzeit sind es " + nf1.format(c.istSchnitt) +
+            ". Regulieren können Sie das über zusätzliche Wertachsen oder über eine Ausgangsfläche mit niedrigerem Wert, etwa Acker.",
+            "To cover the estimated full costs in the mid-price case, the uplift would have to reach " + nf1.format(c.noetig) +
+            " points per m² on average; currently it is " + nf1.format(c.istSchnitt) +
+            ". You can adjust this through additional value axes or a site with a lower initial value, such as arable land."),
+          T("Erlös deckt die geschätzten Vollkosten im mittleren Preisfall nicht.","Revenue does not cover the estimated full costs in the mid-price case."));
+      if(S.timeLag!==null && S.timeLag!==timeLagAuto())
+        note("rechnung",
+          T("Sie haben den Time-Lag-Faktor von Hand gesetzt. Aus den gewählten Wertachsen würde sich " + nf1.format(timeLagAuto()) + " ergeben.",
+            "You have set the time-lag factor manually. The selected value axes would give " + nf1.format(timeLagAuto()) + "."),
+          T("Time-Lag von Hand gesetzt.","Time lag set manually."));
+    }
+    return out;
+  }
+
+  function alleHinweise(){
+    var r = [];
+    for(var i=0;i<4;i++) hinweise(i).forEach(function(h){ r.push(h); });
+    return r;
+  }
+
+  function fertig(i){
+    if(i===0) return S.ziele.length>0;
+    if(i===1) return !!(S.nutzung && ausgangswert()!==null && S.offenland && S.biotop && S.verfuegbar && S.gapdzv);
+    if(i===2) return !!(S.eigentum && S.betrieb && S.kapazitaet && S.waerme);
+    if(i===3) return calc().fGes>0 && calc().aw!==null;
+    return true;
+  }
+  function fehltText(i){
+    if(i===1 && S.nutzung && ausgangswert()===null)
+      return T("Bitte einen Ausgangswert zwischen 0 und 24 eintragen","Please enter an initial value between 0 and 24");
+    return T("Bitte alle Fragen dieses Schritts beantworten","Please answer all questions in this step");
+  }
+
+  /* Rolle: [Bezeichnung, Text, hervorgehoben] */
+  function rolle(){
+    var r = [];
+    var sich = {
+      kommune:T("Die Kommune kann das Ökokonto führen und die Maßnahme rechtlich sichern.","The municipality can run the eco-account (Ökokonto) and legally secure the measure."),
+      betrieb:T("Der Betrieb sichert die Maßnahme und trägt Verfahren und Vorfinanzierung.","The farm secures the measure and bears the procedure and pre-financing."),
+      dritte:T("Der Eigentümer muss zustimmen und die Sicherung mittragen.","The owner must agree and support the legal securing.")
+    }[S.eigentum];
+    var wp = T("Die Wertpunkte stehen demjenigen zu, der die Maßnahme rechtlich sichert.","The value points belong to whoever legally secures the measure.");
+    var wpZu = {
+      kommune:T(" Sichert die Kommune die Maßnahme, stehen ihr die Wertpunkte zu.", " If the municipality secures the measure, the value points are hers."),
+      betrieb:T(" Hier ist das der Betrieb; die Kommune wirkt über ihre Nachfrage nach Wertpunkten."," Here that is the farm; the municipality acts through its demand for value points."),
+      dritte:T(" Auf der Fläche eines Dritten ist die Zuordnung vertraglich zu regeln."," On land of a third party, the allocation has to be settled by contract.")
+    }[S.eigentum] || "";
+    r.push([T("Sicherung","Legal securing"), sich || T("noch offen","still open")]);
+    r.push([T("Wertpunkte","Value points"), wp + wpZu, true]);
+    r.push([T("Pflege und Bewirtschaftung","Care and management"),
+      S.betrieb==="ja" ? T("durch den derzeitigen Bewirtschafter","by the current farmer") :
+      (S.betrieb==="nein" ? T("noch offen, möglich auch über einen Dienstleister","still open, a service provider is also possible") : T("noch offen","still open"))]);
+    r.push([T("Projektsteuerung","Project management"),
+      S.kapazitaet==="ja" ? T("durch die Kommune selbst","by the municipality itself") :
+      (S.kapazitaet==="nein" ? T("extern, über Verbandsgemeinde, Fachbüro oder Agroforst-Dienstleister","external, via the Verbandsgemeinde, a specialist consultancy or an agroforestry service provider") : T("noch offen","still open"))]);
+    r.push([T("Erlöse","Revenue"),
+      S.waerme==="ja" ? T("Wertpunkte, ergänzt um Hackschnitzel für die Wärmenutzung","value points, supplemented by wood chips for heat use") :
+      (S.waerme==="offen" ? T("Wertpunkte; Wärmenutzung der Hackschnitzel wird geprüft","value points; heat use of the wood chips is being examined") :
+       (S.waerme==="nein" ? T("Wertpunkte (einziger Erlös)","value points (only revenue)") : T("Wertpunkte","Value points")))]);
+    return r;
+  }
+
+  function auflagen(){
+    var a = [T("Mindeststandzeit der Maßnahme 20 Jahre und Fortbestand für die Dauer des Eingriffs","Minimum standing time of the measure 20 years, and continuity for the duration of the intervention"),
+             T("Pflanzenschutzmittel höchstens im ersten Etablierungsjahr","Plant protection products at most in the first establishment year")];
+    if(S.a2==="mittel") a.push(T("Umtriebszeit von mindestens 10 Jahren auf mindestens 20 % der Gehölzfläche","Rotation period of at least 10 years on at least 20% of the woody area"));
+    if(S.a2==="alt")    a.push(T("Überhälter mit 50 Jahren Standzeit auf mindestens 10 % der Individuen, entspricht im Zielzustand über 20 % der Beschirmung","Standard trees (Überhälter) with 50 years standing time on at least 10% of individuals, equivalent to over 20% canopy cover in the target condition"));
+    if(S.mosaik)        a.push(T("Mindestens 3 zeitversetzt geerntete Nutzungsabschnitte, je Erntedurchgang bleibt mindestens einer stehen","At least 3 use sections harvested at different times; at least one is left standing in each harvest round"));
+    if(S.mehrreihig)    a.push(T("Pro Gehölzstreifen mindestens 4 Reihen oder 10 m Streifenbreite","At least 4 rows or 10 m strip width per woody strip"));
+    if(S.arten)         a.push(T("Mindestens 3 standortheimische oder ökologisch wertvolle Arten nach Pflanzplan","At least 3 site-native or ecologically valuable species according to the planting plan"));
+    if(S.saum>0)        a.push(T("Saum von " + m(S.saum) + " je Seite, nicht in der Nutzung der Hauptkultur, strukturreich anzulegen","Margin strip of " + m(S.saum) + " per side, outside the use of the main crop, to be established with rich structure"));
+    return a;
+  }
+
+  /* ---------------------------------------------------------------- Render-Hilfen */
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function el(tag, attrs, html){
+    var n = document.createElement(tag);
+    if(attrs) for(var k in attrs){ if(attrs[k]!==null && attrs[k]!==undefined) n.setAttribute(k, attrs[k]); }
+    if(html!==undefined) n.innerHTML = html;
+    return n;
+  }
+  function radios(name, legend, hint, options, current, cols){
+    var h = '<fieldset><legend>'+legend+'</legend>';
+    if(hint) h += '<div class="hint">'+hint+'</div>';
+    h += '<div class="'+(cols?"grid2":"opts")+'">';
+    options.forEach(function(o){
+      h += '<label class="opt"><input type="radio" name="'+name+'" value="'+o.v+'"'+(current===o.v?" checked":"")+'>'+
+           '<span>'+esc(o.l)+(o.s?'<span class="sub">'+esc(o.s)+'</span>':'')+'</span></label>';
+    });
+    return h + '</div>';
+  }
+  function boxes(name, legend, hint, options, isOn, cols){
+    var h = '<fieldset><legend>'+legend+'</legend>';
+    if(hint) h += '<div class="hint">'+hint+'</div>';
+    h += '<div class="'+(cols?"grid2":"opts")+'">';
+    options.forEach(function(o){
+      h += '<label class="opt"><input type="checkbox" name="'+name+'" value="'+o.v+'"'+(isOn(o.v)?" checked":"")+'>'+
+           '<span>'+esc(o.l)+(o.s?'<span class="sub">'+esc(o.s)+'</span>':'')+'</span></label>';
+    });
+    return h + '</div>';
+  }
+  function fq(i,keys){ return flagsFor(hinweise(i).filter(function(x){ return keys.indexOf(x.q)>=0; })); }
+  function flagsFor(list){
+    return list.map(function(h){
+      return '<div class="flag '+h.art+'"><span class="tag">'+(h.art==="warn"?T("Achtung","Warning"):T("Hinweis","Note"))+'</span><span class="ftxt">'+h.text+'</span></div>';
+    }).join("");
+  }
+  function schrittName(i){ return T("Schritt ","Step ")+(i+1)+" "+steps()[i]; }
+  var YN = function(){ return [{v:"nein",l:T("nein","no")},{v:"ja",l:T("ja","yes")}]; };
+
+  function querschnitt(c){
+    if(!(c.B>0)) return "";
+    var W = 520, H = 92, pad = 26, inner = W - 2*pad;
+    var sb = c.B>0 ? (c.b / c.B) * inner : 0;
+    var kern = inner - 2*sb;
+    var y = 26, hgt = 34;
+    function t(x,yy,txt,anchor,size,col){
+      return '<text x="'+x+'" y="'+yy+'" text-anchor="'+(anchor||"middle")+'" font-size="'+(size||10)+
+             '" fill="'+(col||"currentColor")+'" font-family="inherit">'+txt+'</text>';
+    }
+    var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+T("Querschnitt des Gehölzstreifens","Cross-section of the woody strip")+'" style="color:var(--ink-3)">';
+    s += '<rect x="'+pad+'" y="'+y+'" width="'+sb+'" height="'+hgt+'" fill="var(--note-bg)" stroke="var(--note-line)"/>';
+    s += '<rect x="'+(pad+sb)+'" y="'+y+'" width="'+kern+'" height="'+hgt+'" fill="var(--accent-2)" stroke="var(--accent)"/>';
+    s += '<rect x="'+(pad+sb+kern)+'" y="'+y+'" width="'+sb+'" height="'+hgt+'" fill="var(--note-bg)" stroke="var(--note-line)"/>';
+    s += t(pad+sb+kern/2, y+hgt/2+4, T("Kern "+nf1.format(c.kernB)+" m, Außenreihe zu Außenreihe","Core "+nf1.format(c.kernB)+" m, outer row to outer row"), "middle", 11, "var(--ink)");
+    if(c.b>0){
+      s += t(pad+sb/2, y-7, nf1.format(c.b)+" m", "middle", 10);
+      s += t(pad+sb+kern+sb/2, y-7, nf1.format(c.b)+" m", "middle", 10);
+      s += t(pad+sb/2, y+hgt+14, T("Saum","Margin"), "middle", 10);
+      s += t(pad+sb+kern+sb/2, y+hgt+14, T("Saum","Margin"), "middle", 10);
+    }
+    s += '<line x1="'+pad+'" y1="'+(y+hgt+26)+'" x2="'+(W-pad)+'" y2="'+(y+hgt+26)+'" stroke="currentColor" stroke-width="1"/>';
+    s += t(W/2, y+hgt+22, T("Breite des Gehölzstreifens "+nf1.format(c.B)+" m","Width of the woody strip "+nf1.format(c.B)+" m"), "middle", 10);
+    s += '</svg>';
+    return s;
+  }
+
+  /* ---------------------------------------------------------------- Schritte */
+  function panelHTML(i){
+    var h = "", c;
+    var of5 = T("Schritt "+(i+1)+" von 5","Step "+(i+1)+" of 5");
+    if(i===0){
+      h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Was soll die Maßnahme für die Kommune leisten?","What should the measure achieve for the municipality?")+'</h2>';
+      h += '<fieldset><legend>'+T("Gemeinde oder Vorhaben","Municipality or project")+'</legend><div class="fields">'+
+           '<label class="f" style="grid-column:1/-1">'+T("Bezeichnung","Name")+' <span class="u">'+T("erscheint auf dem Ergebnisblatt","appears on the result sheet")+'</span>'+
+           '<input type="text" id="gemeinde" value="'+esc(S.gemeinde)+'" placeholder="'+esc(T("z. B. Ortsgemeinde Musterbach, Flur 3","e.g. Musterbach local municipality, plot 3"))+'"></label>'+
+           '</div></fieldset>';
+      h += boxes("ziele",T("Soll die Maßnahme auch wirtschaftlich etwas einbringen, oder steht sie für sich?","Should the measure also bring in money, or does it stand on its own?"),
+        T("Mehrfachnennung möglich.","Multiple answers possible."),[
+        {v:"klima", l:T("Klimaschutz und Klimaanpassung","Climate protection and adaptation"), s:T("Hochwasser- und Erosionsschutz, Beschattung, resiliente Landwirtschaft","flood and erosion protection, shading, resilient farming")},
+        {v:"waerme", l:T("Wärme und regionale Wertschöpfung","Heat and regional value creation"), s:T("Hackschnitzel für Heizwerk oder Nahwärme","wood chips for a heating plant or local heat network")},
+        {v:"kompensation", l:T("Eigener Kompensationsbedarf","Own compensation need"), s:T("Wertpunkte für eigene Vorhaben oder zum Verkauf","value points for own projects or for sale")},
+        {v:"rohstoff", l:T("Rohstoffe und lokale Wirtschaft","Raw materials and local economy"), s:T("holzbasierte Rohstoffe für die regionale Verarbeitung, langfristiger Nutzen","wood-based raw materials for regional processing, long-term benefit")}
+      ], function(v){ return S.ziele.indexOf(v)>=0; }, true);
+      h += fq(0,["ziele"]) + '</fieldset>';
+    }
+
+    if(i===1){
+      h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Lässt die Fläche eine Aufwertung zu, und ist sie lang genug verfügbar?","Does the site allow an uplift, and is it available for long enough?")+'</h2>';
+      var opts = Object.keys(AUSGANG).map(function(k){
+        return {v:k, l:P(AUSGANG[k].label), s:P(AUSGANG[k].spanne)};
+      });
+      h += radios("nutzung",T("Ausgangsnutzung der Fläche","Current land use of the site"),
+        T("Agroforstsysteme und produktionsintegrierte Kompensation setzen eine landwirtschaftlich genutzte Fläche voraus. Der Ausgangswert in Punkten je m² entscheidet über die mögliche Aufwertung.",
+          "Agroforestry systems and production-integrated compensation require agriculturally used land. The initial value in points per m² determines the possible uplift."), opts, S.nutzung, true);
+      if(S.nutzung){
+        var rw = richtwert();
+        h += '<div class="fields"><label class="f">'+T("Ausgangswert","Initial value")+' <span class="u">'+T("Punkte je m², ","points per m², ")+
+             (rw!==null ? T("mit dem Richtwert vorbelegt, überschreibbar","preset to the guide value, can be overwritten") : T("bitte eintragen","please enter"))+'</span>'+
+             '<input type="text" inputmode="decimal" id="wertManuell" value="'+esc(S.wertManuell)+'"'+(rw===null?' placeholder="'+T("z. B. 7","e.g. 7")+'"':'')+'></label></div>'+
+             '<div class="hint" style="margin-top:7px">'+T("Wenn Sie den Biotopwert der Fläche kennen, tragen Sie ihn hier ein: ","If you know the biotope value of the site, enter it here: ")+
+             '<a href="'+LINK_LEITFADEN+'" target="_blank" rel="noopener">'+T("Praxisleitfaden zur Ermittlung des Kompensationsbedarfs in Rheinland-Pfalz","Practical guide to determining the compensation requirement in Rhineland-Palatinate (in German)")+'</a>'+
+             T(", Anlage 7.1 Biotopwertliste.",", Annex 7.1 biotope value list.")+'</div>';
+      }
+      h += fq(1,["nutzung"]) + '</fieldset>';
+
+      h += radios("offenland",T("Liegt die Fläche in einem Offenland- oder Rastvogelgebiet?","Is the site in an open-country or resting-bird area?"), null,
+        [{v:"nein",l:T("nein","no")},{v:"ja",l:T("ja","yes")},{v:"unklar",l:T("nicht geprüft","not checked")}], S.offenland, true);
+      h += fq(1,["offenland"]) + '</fieldset>';
+
+      h += radios("biotop",T("Liegt ein gesetzlich geschütztes Biotop auf der Fläche?","Is there a legally protected biotope on the site?"),
+        T("Streuobstwiese, Magerrasen, Feuchtgrünland und andere Biotope nach § 30 BNatSchG.","Orchard meadow, nutrient-poor grassland, wet grassland and other biotopes under § 30 BNatSchG."),
+        [{v:"nein",l:T("nein","no")},{v:"ja",l:T("ja","yes")},{v:"unklar",l:T("nicht geprüft","not checked")}], S.biotop, true);
+      h += fq(1,["biotop"]) + '</fieldset>';
+
+      h += radios("verfuegbar",T("Ist die Fläche analog zur Dauer des Eingriffs verfügbar?","Is the site available for as long as the intervention lasts?"), null,
+        [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"offen",l:T("noch offen","still open")}], S.verfuegbar, true);
+      h += fq(1,["verfuegbar"]) + '</fieldset>';
+
+      h += radios("gapdzv",T("Erfüllt das System die Anforderungen der Öko-Regelung 3?","Does the system meet the requirements of Eco-Scheme 3?"),
+        T('Vorausgesetzt werden die Agroforstdefinition nach § 4 Abs. 2 GAPDZV und die Anforderungen der Öko-Regelung 3. '+
+          'So entspricht bereits die Grundausprägung den Qualitätsstandards, die für den Förderanspruch entwickelt wurden. '+
+          'Eckpunkte: mindestens 2 Gehölzstreifen, je höchstens 25 m breit, Gehölzanteil 2 bis 40 % der Fläche, 20 bis 100 m Abstand zwischen den Streifen. '+
+          'Ob neben der Kompensation zusätzlich die Förderung über die Öko-Regelung 3 möglich ist, ist derzeit offen. ',
+          'The agroforestry definition under § 4 (2) GAPDZV (CAP direct payments ordinance) and the requirements of Eco-Scheme 3 are assumed. '+
+          'The baseline value of 8 points therefore already corresponds to the quality standards developed for the subsidy entitlement. '+
+          'Key points: at least 2 woody strips, each at most 25 m wide, woody share 2 to 40% of the area, 20 to 100 m between the strips. '+
+          'Whether the Eco-Scheme 3 subsidy can be claimed in addition to compensation is currently open. ')+
+        '<a href="'+LINK_OER3+'" target="_blank" rel="noopener">'+T("Mehr zur Öko-Regelung 3","More on Eco-Scheme 3 (in German)")+'</a>',
+        [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"unklar",l:T("noch offen","still open")}], S.gapdzv, true);
+      h += fq(1,["gapdzv"]) + '</fieldset>';
+    }
+
+    if(i===2){
+      h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Wer trägt die Maßnahme, und wem stehen die Wertpunkte zu?","Who carries the measure, and who is entitled to the value points?")+'</h2>';
+      h += radios("eigentum",T("Wem gehört die Fläche?","Who owns the site?"), null,
+        [{v:"betrieb",l:T("dem landwirtschaftlichen Betrieb","the farm")},{v:"kommune",l:T("der Kommune (Verpächterin)","the municipality (as lessor)")},{v:"dritte",l:T("einem Dritten","a third party")}],
+        S.eigentum, true);
+      h += fq(2,["eigentum"]) + '</fieldset>';
+      h += radios("betrieb",T("Übernimmt der aktuelle Bewirtschafter der Fläche Pflege und Bewirtschaftung der Maßnahme?","Will the current farmer of the site take over care and management of the measure?"),
+        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")}], S.betrieb, true);
+      h += fq(2,["betrieb"]) + '</fieldset>';
+      h += radios("kapazitaet",T("Hat die Kommune Kapazität, sich um die operative Projektumsetzung zu kümmern?","Does the municipality have the capacity to handle operational project implementation?"),
+        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")}], S.kapazitaet, true);
+      h += fq(2,["kapazitaet"]) + '</fieldset>';
+      h += radios("waerme",T("Wäre es in der Region interessant, Hackschnitzel für die Wärmenutzung einzubringen?","Would it be of interest in the region to supply wood chips for heat use?"),
+        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"offen",l:T("noch offen","still open")}], S.waerme, true);
+      h += fq(2,["waerme"]) + '</fieldset>';
+      if(S.eigentum || S.betrieb || S.kapazitaet || S.waerme){
+        h += '<div class="section-head">'+T("Daraus folgt","This implies")+'</div><dl class="kv rolle">'+
+             rolle().map(function(r){ var k = r[2] ? ' class="hl"' : ''; return '<dt'+k+'>'+r[0]+'</dt><dd'+k+'>'+r[1]+'</dd>'; }).join("")+'</dl>';
+      }
+    }
+
+    if(i===3){
+      c = calc();
+      h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Trägt der Erlös aus Wertpunkten die Anlage?","Does the revenue from value points cover the establishment?")+'</h2>'+
+           '<p class="intro">'+T("Überschlag für die Sitzung, kein Ersatz für die gutachterliche Bilanzierung.","Rough estimate for the meeting, not a substitute for the expert assessment.")+'</p>';
+
+      h += '<div class="divider"></div>';
+      h += boxes("achsen",T("Was ist geplant?","What is planned?"),
+        T("Jedes Merkmal hebt den Zielwert des Gehölzkerns. Ohne diese Merkmale bleibt es bei der Grundausprägung von 8 Punkten.","Each feature raises the target value of the woody core. Without these features the baseline value of 8 points applies."),[
+        {v:"mosaik", l:T("Nutzungsmosaik, +1","Harvest mosaic, +1"), s:T("mindestens 3 zeitversetzt geerntete Abschnitte, je Erntedurchgang bleibt einer stehen","at least 3 sections harvested at different times; one section stays standing in each harvest round")},
+        {v:"mehrreihig", l:T("Mehrreihigkeit, +1","Multi-row planting, +1"), s:T("pro Gehölzstreifen mindestens 4 Reihen oder 10 m Breite","at least 4 rows or 10 m width per woody strip")},
+        {v:"arten", l:T("Artenvielfalt, +2","Species diversity, +2"), s:T("mindestens 3 standortheimische oder ökologisch wertvolle Arten","at least 3 site-native or ecologically valuable species")},
+        {v:"gewaesser", l:T("Gewässerbegleitend, +1","Along a watercourse, +1"), s:T("über mindestens 80 % der Uferlinie, Beginn innerhalb von 5 m","along at least 80% of the bank line, starting within 5 m")}
+      ], function(v){ return !!S[v]; }, true) + '</fieldset>';
+      h += radios("a2",T("Nutzungsintervall und Standzeit","Use interval and standing time"),
+        T("Die beiden Stufen schließen einander aus und bestimmen zugleich den Time-Lag-Faktor.","The two levels are mutually exclusive and also determine the time-lag factor."),[
+        {v:"keine", l:T("kurzer Umtrieb, keine Überhälter","short rotation, no standard trees"), s:T("Grundausprägung","baseline")},
+        {v:"mittel", l:T("Umtriebszeit ab 10 Jahren, +3","Rotation period from 10 years, +3"), s:T("auf mindestens 20 % der Gehölzfläche","on at least 20% of the woody area")},
+        {v:"alt", l:T("Überhälter mit 50 Jahren Standzeit, +6","Standard trees (Überhälter) with 50 years standing time, +6"), s:T("auf mindestens 10 % der Individuen, entspricht im Zielzustand über 20 % der Beschirmung","on at least 10% of individuals, equivalent to over 20% canopy cover in the target condition")}
+      ], S.a2, false) + '</fieldset>';
+
+      h += '<div class="divider"></div>';
+      h += '<fieldset style="margin-top:10px"><legend>'+T("Was wissen Sie über die Gehölzstreifen?","What do you know about the woody strips?")+'</legend><div class="seg">'+
+           '<label><input type="radio" name="eingabe" value="flaeche"'+(S.eingabe==="flaeche"?" checked":"")+'>'+T("Flächengröße und Anzahl der Streifen","Field size and number of strips")+'</label>'+
+           '<label><input type="radio" name="eingabe" value="laenge"'+(S.eingabe==="laenge"?" checked":"")+'>'+T("Gesamtlänge der Streifen","Total length of the strips")+'</label>'+
+           '</div></fieldset>';
+      h += '<div class="fields">';
+      if(S.eingabe==="flaeche"){
+        h += '<label class="f">'+T("Größe des Schlags","Field size")+' <span class="u">ha</span>'+
+               '<input type="text" inputmode="decimal" id="schlag" value="'+esc(S.schlag)+'"></label>'+
+             '<label class="f">'+T("Anzahl der Gehölzstreifen","Number of woody strips")+' <span class="u">'+T("Stück","count")+'</span>'+
+               '<input type="text" inputmode="numeric" id="anzahl" value="'+esc(S.anzahl)+'"></label>';
+      } else {
+        h += '<label class="f">'+T("Länge der Gehölzstreifen","Length of the woody strips")+' <span class="u">'+T("m, alle Streifen zusammen","m, all strips together")+'</span>'+
+               '<input type="text" inputmode="decimal" id="laenge" value="'+esc(S.laenge)+'"></label>';
+      }
+      h += '<label class="f">'+T("Breite der Gehölzstreifen","Width of the woody strips")+' <span class="u">'+T("m je Streifen, inklusive Saum","m per strip, including margin strip")+'</span>'+
+          '<input type="text" inputmode="decimal" id="breite" value="'+esc(S.breite)+'"></label>'+
+        '<label class="f">'+T("Saumbreite je Seite","Margin strip width per side")+' <span class="u">m</span><select id="saum">'+
+          SAUM_OPT.map(function(b){
+            var raus = (b>0 && 2*b >= zahl(S.breite));
+            return '<option value="'+b+'"'+(zahl(S.saum)===b?" selected":"")+(raus?" disabled":"")+'>'+
+                   (b===0 ? T("kein anrechenbarer Saum","no creditable margin strip") : m(b))+'</option>';
+          }).join("")+
+        '</select></label>'+
+        '<label class="f">'+T("Entwicklungsdauer bis zum Zielzustand (Time-Lag-Faktor)","Development time to target condition (time-lag factor)")+'<select id="timeLag">'+
+          [[1,T("1,0 · unter 5 Jahre","1.0 · under 5 years")],[1.2,T("1,2 · 5 bis 10 Jahre","1.2 · 5 to 10 years")],[1.5,T("1,5 · 10 bis 30 Jahre","1.5 · 10 to 30 years")],[2,T("2,0 · über 30 Jahre","2.0 · over 30 years")]]
+          .map(function(o){ return '<option value="'+o[0]+'"'+(timeLag()===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")+
+        '</select></label>'+
+        '</div>';
+      h += '<div class="hint" style="margin-top:9px">'+
+        T("Der Faktor gibt an, wie lange die Gehölze bis zum Zielzustand brauchen: 1,0 bei unter 5 Jahren, 1,2 bei 5 bis 10, 1,5 bei 10 bis 30 und 2,0 bei über 30 Jahren. Der Zielwert wird durch den Faktor geteilt; je länger die Entwicklung dauert, desto weniger Punkte sind anrechenbar. Vorbelegt ist 1,2, mit Überhältern 1,5; Sie können den Faktor überschreiben.",
+          "The factor states how long the woody plants need to reach the target condition: 1.0 for under 5 years, 1.2 for 5 to 10, 1.5 for 10 to 30 and 2.0 for over 30 years. The target value is divided by the factor; the longer the development takes, the fewer points are creditable. The preset is 1.2, or 1.5 with standard trees; you can overwrite the factor.")+'</div>';
+      h += '<div id="calcOut">'+calcOutHTML()+'</div>';
+    }
+
+    if(i===4){
+      h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Womit Sie in die Vorabstimmung gehen","What you take into the pre-consultation")+'</h2>'+
+           '<p class="intro">'+T("Zusammengestellt ist, was aus Ihren Angaben folgt und was eine untere Naturschutzbehörde unabhängig vom Einzelfall wissen will.",
+             "Below is what follows from your entries and what a lower nature conservation authority wants to know regardless of the individual case.")+'</p>';
+      h += '<div class="section-head">'+T("Der Weg im Überblick","The process at a glance")+'</div>';
+      h += '<div class="flowwrap">';
+      h += '<div class="flowhead"><span class="k">'+T("Schritt 1 bis 4","Steps 1 to 4")+'</span><span class="v">'+T("Vorbereiten, abstimmen, planen, sichern","Prepare, consult, plan, secure")+'</span></div>';
+      h += '<div class="cards">' + ABLAUF.slice(0,4).map(karte).join("") + '</div>';
+      h += '<div class="flowhead"><span class="k">'+T("Schritt 5 bis 8","Steps 5 to 8")+'</span><span class="v">'+T("Anerkennen, pflanzen, nachweisen, erhalten","Recognise, plant, document, maintain")+'</span></div>';
+      h += '<div class="cards">' + ABLAUF.slice(4).map(karte).join("") + '</div>';
+      h += '<div class="flownote">'+T("Die Schritte 1 bis 3 sind eine Abstimmungsschleife, keine Einbahnstraße.","Steps 1 to 3 form a feedback loop, not a one-way street.")+'</div>';
+      h += '<div class="erloes"><b>'+T("Erlös","Revenue")+'</b><span>'+T("Nicht an die Reihenfolge gebunden. Er entsteht mit der Zuordnung zu einem Eingriff, nicht mit der Pflanzung, und steht dem Berechtigten der Wertpunkte zu.",
+        "Not tied to the sequence. It arises when the value points are assigned to an intervention, not with the planting, and belongs to whoever holds the entitlement to the value points.")+'</span></div>';
+      h += '</div>';
+
+      var hs = alleHinweise();
+      h += '<div class="section-head">'+T("Aus Ihren Angaben","From your entries")+'</div>';
+      h += hs.length
+        ? '<ul class="plain">'+hs.map(function(x){ return '<li><span class="mark"></span><span>'+x.kurz+
+            ' <span class="counter">('+schrittName(x.schritt)+')</span></span></li>'; }).join("")+'</ul>'
+        : '<div class="hint" style="margin-top:8px">'+T("Aus dem Durchlauf ist nichts offengeblieben.","Nothing was left open in this run-through.")+'</div>';
+
+      h += '<div class="section-head">'+T("Unabhängig vom Einzelfall zu klären","To be clarified regardless of the individual case")+'</div>';
+      h += '<ul class="plain">'+FESTE_PUNKTE.map(function(p){
+             return '<li><span class="mark"></span><span><b>'+P(p[0])+'</b> '+P(p[1])+'</span></li>'; }).join("")+'</ul>';
+
+      h += '<fieldset><legend>'+T("Eigene Punkte","Your own points")+'</legend><div class="hint">'+T("Erscheinen auf dem Ergebnisblatt und im Mailentwurf an die untere Naturschutzbehörde.","Appear on the result sheet and in the draft email to the lower nature conservation authority.")+'</div>'+
+           '<textarea id="notiz" placeholder="'+esc(T("Was Sie außerdem ansprechen wollen","Anything else you want to raise"))+'">'+esc(S.notiz)+'</textarea></fieldset>';
+    }
+    return h;
+  }
+
+  function calcOutHTML(){
+    var c = calc(), o = "";
+    if(S.eingabe==="flaeche" && c.n>0 && c.schlag>0)
+      o += '<div class="hint" style="margin-top:9px">'+
+           T('Grober Überschlag: Angenommen ist ein annähernd quadratischer Schlag, die Streifen laufen über die ganze Länge. Daraus rund '+num(c.seite)+' m je Streifen, zusammen '+num(c.L)+' m. Bei langgestreckten Schlägen mit Streifen in Längsrichtung ist die Länge größer; wenn Sie sie kennen, rechnen Sie mit der Gesamtlänge genauer.',
+             'Rough estimate: the field is assumed to be roughly square, with the strips running along its full length. This gives about '+num(c.seite)+' m per strip, '+num(c.L)+' m in total. For elongated fields with strips along the long side the length is larger; if you know it, calculating with the total length is more accurate.')+'</div>';
+    o += '<div class="cut">'+querschnitt(c)+'</div>';
+    o += fq(3,["saum","masse"]);
+    o += '<div class="hint" style="margin-top:9px">'+T("Daraus: Gehölzfläche ","Result: woody area ")+nf2.format(c.ha)+' ha'+
+         (c.anteil!==null ? ' ('+pc(c.anteil*100)+T(" des Schlags"," of the field")+')' : '')+
+         T(', davon Kern ',', of which core ')+num(c.fKern)+' m² '+T('und Saum ','and margin strip ')+num(c.fSaum)+' m².</div>';
+
+    o += '<div class="section-head">'+T("Überschlag","Rough estimate")+'</div>';
+    var awS = c.aw===null ? "–" : nf1.format(c.aw);
+    o += '<div class="tblwrap"><table class="rtable">'+
+      '<tr><th></th><th>'+T("Rechnung","Calculation")+'</th><th style="text-align:right">'+T("Wertpunkte","Value points")+'</th></tr>'+
+      '<tr><td>'+T("Gehölzkern","Woody core")+'</td><td>'+T("Zielwert "+c.ziel+" geteilt durch "+nf1.format(c.tl)+" = "+nf1.format(c.anrechenbar)+", abzüglich Ausgangswert "+awS,
+          "Target value "+c.ziel+" divided by "+nf1.format(c.tl)+" = "+nf1.format(c.anrechenbar)+", minus initial value "+awS)+'</td>'+
+        '<td class="n">'+(c.aw===null?"–":num(c.pKern))+'</td></tr>'+
+      '<tr><td>'+T("Saum","Margin strip")+'</td><td>'+(c.fSaum>0 ? T('16 Punkte ohne Time-Lag, abzüglich Ausgangswert '+awS,'16 points without time lag, minus initial value '+awS) : T('kein anrechenbarer Saum','no creditable margin strip'))+'</td>'+
+        '<td class="n">'+(c.aw===null||c.fSaum===0?"–":num(c.pSaum))+'</td></tr>'+
+      '<tr class="sum"><td>'+T("Wertpunkte gesamt","Total value points")+'</td><td></td><td class="n">'+(c.aw===null?"–":num(c.punkte))+'</td></tr>'+
+      '</table></div>';
+    o += '<div class="tblwrap"><table class="rtable"><caption>'+T("Erlös und Kosten, Beträge gerundet","Revenue and costs, amounts rounded")+'</caption>'+
+      '<tr><th></th><th>'+T("Bezug","Basis")+'</th><th style="text-align:right">'+T("Betrag","Amount")+'</th></tr>';
+    if(c.positiv){
+      o += '<tr><td>'+T("Erlös bei "+pEur(0.5)+" je Punkt","Revenue at "+pEur(0.5)+" per point")+'</td><td></td><td class="n">'+eur(c.eMin)+'</td></tr>'+
+           '<tr><td>'+T("Erlös bei "+pEur(1.5)+" je Punkt","Revenue at "+pEur(1.5)+" per point")+'</td><td>'+T("mittlerer Marktwert","mid market value")+'</td><td class="n">'+eur(c.eMid)+'</td></tr>'+
+           '<tr><td>'+T("Erlös bei "+pEur(3)+" je Punkt","Revenue at "+pEur(3)+" per point")+'</td><td></td><td class="n">'+eur(c.eMax)+'</td></tr>';
+    } else {
+      o += '<tr><td>'+T("Erlös aus Wertpunkten","Revenue from value points")+'</td><td>'+T("keine Aufwertung","no uplift")+'</td><td class="n">'+T("entfällt","n/a")+'</td></tr>';
+    }
+    var basis = nf2.format(c.ha)+' ha, '+T("nach einem Einzelfall","based on a single case");
+    o += '<tr><td>'+T("Kosten Anlage und erstes Standjahr, geschätzt","Costs of establishment and first year, estimated")+'</td><td>'+basis+'</td><td class="n">'+eur(c.kAnlage)+'</td></tr>'+
+      '<tr class="sum"><td>'+T("Vollkosten über 20 Jahre, geschätzt","Full costs over 20 years, estimated")+'</td><td>'+basis+'</td><td class="n">'+eur(c.k20)+'</td></tr>'+
+      '</table></div>';
+    if(c.aw!==null){
+      o += '<div style="margin-top:14px">'+(c.positiv
+        ? '<span class="chip '+(c.deckung>=1?"ok":"note")+'">'+(c.deckung>=1
+            ? T("Erlös deckt die geschätzten Vollkosten im mittleren Preisfall ("+pc(c.deckung*100)+")","Revenue covers the estimated full costs in the mid-price case ("+pc(c.deckung*100)+")")
+            : T("Erlös deckt die geschätzten Vollkosten im mittleren Preisfall nicht ("+pc(c.deckung*100)+")","Revenue does not cover the estimated full costs in the mid-price case ("+pc(c.deckung*100)+")"))+'</span>'
+        : '<span class="chip warn">'+T("Keine Aufwertung: Eingriff, keine Kompensationsmaßnahme","No uplift: intervention, not a compensation measure")+'</span>')+'</div>';
+    }
+    o += fq(3,["rechnung"]);
+    o += '<div class="hint" style="margin-top:12px">'+
+         T('Die angekreuzten Merkmale müssen später im Pflanzplan festgeschrieben werden, sonst sind sie nicht anrechenbar. Die Kosten sind mögliche Kosten, geschätzt nach einem einzelnen untersuchten Standort aus einem Forschungsvorhaben, bepflanzt mit Pappelsorten und 9 heimischen Arten. Sie ersetzen keine eigene Kalkulation.',
+           'The ticked features must later be fixed in the planting plan, otherwise they are not creditable. The costs are possible costs, estimated from a single studied site in a research project, planted with poplar varieties and 9 native species. They do not replace your own calculation.')+'</div>';
+    return o;
+  }
+
+  function karte(k){
+    return '<div class="card'+(k.here?" here":"")+'" data-here="'+esc(T("Sie stehen hier","You are here"))+'"><span class="no">'+k.n+'</span>'+
+           '<span class="who '+k.c+'">'+esc(P(k.w))+'</span><h4>'+esc(P(k.t))+'</h4>'+
+           '<div class="txt">'+esc(P(k.x))+'</div></div>';
+  }
+
+  /* ---------------------------------------------------------------- Ergebnis */
+  function flaechenText(c){
+    return T(nf2.format(c.ha)+" ha Gehölzfläche"+(S.gapdzv==="ja" ? " entsprechend den Anforderungen der Öko-Regelung 3" : "")+
+           ", davon Gehölzkern "+num(c.fKern)+" m² und Saum "+num(c.fSaum)+" m²"+
+           (S.gapdzv!=="ja" ? " (Anforderungen der Öko-Regelung 3 noch offen)" : ""),
+           nf2.format(c.ha)+" ha woody area"+(S.gapdzv==="ja" ? " meeting the requirements of Eco-Scheme 3" : "")+
+           ", of which woody core "+num(c.fKern)+" m² and margin strip "+num(c.fSaum)+" m²"+
+           (S.gapdzv!=="ja" ? " (requirements of Eco-Scheme 3 still open)" : ""));
+  }
+
+  function mailFragen(c){
+    return [
+      T("Halten Sie die angesetzte Bewertung (Gehölzkern "+c.ziel+" Punkte"+(c.fSaum>0?", Saum 16 Punkte":"")+", Time-Lag-Faktor "+nf1.format(c.tl)+") für die geplante Maßnahme für angemessen?",
+        "Do you consider the assumed assessment (woody core "+c.ziel+" points"+(c.fSaum>0?", margin strip 16 points":"")+", time-lag factor "+nf1.format(c.tl)+") appropriate for the planned measure?"),
+      T("Welche Biotoptypen und Werte wären für den Ausgangszustand anzusetzen?","Which biotope types and values should be applied for the initial condition?"),
+      T("Welche Saumbreite ist anrechenbar, und welche Anforderungen stellen Sie an Anlage und Pflege des Saums?","Which margin strip width is creditable, and what requirements do you set for establishing and maintaining the margin strip?"),
+      T("Wie bewerten Sie die Dauerhaftigkeit bei regelmäßiger Holznutzung (Bindung 20 Jahre, Überhälter 50 Jahre)?","How do you assess permanence under regular wood use (binding period 20 years, standard trees 50 years)?")
+    ];
+  }
+
+  function mailText(){
+    var c = calc(), hs = alleHinweise().filter(function(x){ return x.art==="warn" || x.mail; });
+    var wa = [];
+    if(S.mosaik) wa.push(T("Nutzungsmosaik mit mindestens 3 zeitversetzt geernteten Abschnitten, damit stets Gehölze unterschiedlichen Alters und durchgehend Deckung und Rückzugsraum bestehen","harvest mosaic with at least 3 sections harvested at different times, so that woody plants of different ages and continuous cover and refuge are always present"));
+    if(S.mehrreihig) wa.push(T("pro Gehölzstreifen mindestens 4 Reihen beziehungsweise 10 m Streifenbreite, damit neben den Randbereichen ein geschützter Innenbereich entsteht und sich unterschiedliche Lebensräume ausbilden (Ökotoneffekt)","at least 4 rows or 10 m strip width per woody strip, so that a sheltered interior forms in addition to the edge zones and different habitats develop (ecotone effect)"));
+    if(S.a2==="mittel") wa.push(T("Umtriebszeit ab 10 Jahren auf mindestens 20 % der Gehölzfläche, sodass sich ältere, strukturreichere Bestände entwickeln","rotation period of 10 years or more on at least 20% of the woody area, so that older, more structurally rich stands develop"));
+    if(S.a2==="alt") wa.push(T("Überhälter mit 50 Jahren Standzeit auf mindestens 10 % der Individuen (entspricht im Zielzustand über 20 % der Beschirmung), die als Altbäume Lebensraum für Vögel, Fledermäuse und holzbewohnende Insekten bieten","standard trees (Überhälter) with 50 years standing time on at least 10% of individuals (equivalent to over 20% canopy cover in the target condition), which as old trees provide habitat for birds, bats and wood-dwelling insects"));
+    if(S.arten) wa.push(T("mindestens 3 standortheimische oder ökologisch wertvolle Arten, um das Blüten- und Fruchtangebot über das Jahr zu verlängern","at least 3 site-native or ecologically valuable species, to extend the supply of blossom and fruit through the year"));
+    if(S.gewaesser) wa.push(T("gewässerbegleitender Verlauf, als Puffer gegen Einträge ins Gewässer und als Vernetzungsachse","course along a watercourse, as a buffer against inputs into the water and as a connecting axis"));
+    if(S.saum>0) wa.push(T("Saum von " + m(S.saum) + " je Seite, als strukturreicher Übergang zwischen Gehölz und Nutzfläche","margin strip of " + m(S.saum) + " per side, as a structurally rich transition between woody plants and farmland"));
+    var eig = {betrieb:T("Fläche im Eigentum des Betriebs","land owned by the farm"), kommune:T("Fläche im Eigentum der Kommune","land owned by the municipality"), dritte:T("Fläche im Eigentum eines Dritten","land owned by a third party")}[S.eigentum] || T("Eigentum noch nicht geklärt","ownership not yet clarified");
+    var nutz = AUSGANG[S.nutzung] ? P(AUSGANG[S.nutzung].label) : T("Ausgangsnutzung offen","current land use open");
+    var t = "";
+    t += T("Betreff: Vorabstimmung Agroforstsystem als produktionsintegrierte Kompensation","Subject: Pre-consultation on an agroforestry system as production-integrated compensation")+(S.gemeinde?": "+S.gemeinde:"")+"\n\n";
+    t += T("Sehr geehrte Damen und Herren,\n\n","Dear Sir or Madam,\n\n");
+    t += T("wir prüfen"+(S.gemeinde?" für "+S.gemeinde:"")+", ob ein Agroforstsystem als produktionsintegrierte Kompensationsmaßnahme angelegt werden kann, und möchten das Vorhaben frühzeitig und unverbindlich mit Ihnen abstimmen.\n\n",
+           "we are examining"+(S.gemeinde?" for "+S.gemeinde:"")+" whether an agroforestry system can be established as a production-integrated compensation measure, and would like to discuss the project with you early and without obligation.\n\n");
+    t += T("Vorhaben\n","Project\n");
+    t += "- "+nutz+", "+flaechenText(c)+"\n";
+    t += "- "+eig+T("; Pflege ","; care ")+(S.betrieb==="ja"?T("durch den derzeitigen Bewirtschafter","by the current farmer"):T("noch nicht geklärt","not yet clarified"))+"\n";
+    if(S.waerme==="ja") t += T("- Hackschnitzel sollen in die Wärmenutzung gehen\n","- Wood chips are to go into heat use\n");
+    t += "\n";
+    if(wa.length){ t += T("Geplante Ausgestaltung\n","Planned design\n")+"- "+wa.join("\n- ")+"\n\n"; }
+    t += T("Überschlag\n","Rough estimate\n");
+    if(c.positiv)
+      t += T("Zielwert Gehölzkern "+c.ziel+" Punkte, Time-Lag "+nf1.format(c.tl)+", Saum 16 Punkte; zusammen rund "+num(c.punkte)+" Wertpunkte. ",
+             "Target value of the woody core "+c.ziel+" points, time lag "+nf1.format(c.tl)+", margin strip 16 points; together about "+num(c.punkte)+" value points. ");
+    else
+      t += T("Nach dem Überschlag ergibt sich auf dieser Fläche keine Aufwertung. ","According to the rough estimate, no uplift results on this site. ");
+    t += T("Da die Biotopwertliste keinen Biotoptyp für Agroforst führt, ist der Zielwert über eine Analogie zu Hecken und Baumreihen hergeleitet (Weitz, 2026).\n\n",
+           "As the biotope value list contains no biotope type for agroforestry, the target value is derived by analogy with hedges and tree rows (Weitz, 2026).\n\n");
+    t += T("Wir würden zu diesem Vorhaben gern in einen offenen Austausch mit Ihnen treten. Klärungsbedarf sehen wir vor allem bei folgenden Punkten:\n",
+           "We would like to enter into an open exchange with you on this project. We see a need for clarification mainly on the following points:\n");
+    mailFragen(c).forEach(function(f){ t += "- "+f+"\n"; });
+    hs.forEach(function(x){ t += "- "+(x.mail || x.kurz)+"\n"; });
+    if(S.notiz.trim()) S.notiz.trim().split("\n").forEach(function(z){ if(z.trim()) t += "- "+z.trim()+"\n"; });
+    t += T("\nÜber einen Ortstermin oder ein kurzes Gespräch würden wir uns freuen.\n\n","\nWe would welcome a site visit or a short conversation.\n\n");
+    t += T("Mit freundlichen Grüßen\n\n","Kind regards\n\n");
+    t += "--\n"+T("Erstellt mit dem Entscheidungswerkzeug „Agroforst als Kompensation: Vorprüfung für Kommunen“: ","Created with the decision tool “Agroforestry as compensation: pre-check for municipalities”: ")+P(LINK_WERKZEUG_P)+"\n";
+    t += T("Quelle der Zielwerte: ","Source of the target values: ")+quelleText()+"\n";
+    return t;
+  }
+
+  function heute(){
+    return LANG==="en"
+      ? new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})
+      : new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});
+  }
+
+  function buildModel(){
+    var c = calc(), hs = alleHinweise(), aw = c.aw, pos = c.positiv;
+    var warns = hs.filter(function(x){ return x.art==="warn"; });
+    var notes = hs.filter(function(x){ return x.art==="note"; });
+    var zielText = {klima:T("Klimaschutz und Klimaanpassung","climate protection and adaptation"), waerme:T("Wärme und regionale Wertschöpfung","heat and regional value creation"),
+      kompensation:T("eigener Kompensationsbedarf","own compensation need"), rohstoff:T("Rohstoffe und lokale Wirtschaft","raw materials and local economy")};
+    var M = {c:c, warns:warns, gem:(S.gemeinde.trim() || T("Ohne Bezeichnung","Unnamed")), datum:heute()};
+
+    M.chip = warns.length
+      ? {k:"warn", t:T(warns.length+(warns.length>1?" Punkte sind":" Punkt ist")+" vor der Planung zu klären", warns.length+(warns.length>1?" points have":" point has")+" to be clarified before planning")}
+      : {k:"ok", t:T("Keine Warnhinweise aus den Angaben. Die Abstimmung mit der UNB steht aus.","No warnings from your entries. Consultation with the UNB is still to come.")};
+
+    var dMin = pc(c.deckungMin*100)+T(" bis "," to ")+pc(c.deckungMax*100);
+    M.kpis = pos ? [
+      {k:T("Wertpunkte","Value points"), v:num(c.punkte), s:T("Gehölzkern "+num(c.pKern)+", Saum "+num(c.pSaum),"Woody core "+num(c.pKern)+", margin strip "+num(c.pSaum))},
+      {k:T("Erlös, mittlerer Preisfall","Revenue, mid-price case"), v:T("rund ","about ")+eur(c.eMid), s:T("Spanne "+eur(c.eMin)+" bis "+eur(c.eMax),"Range "+eur(c.eMin)+" to "+eur(c.eMax))},
+      {k:T("Deckung der Vollkosten","Coverage of full costs"), v:pc(c.deckung*100), s:T("Spanne "+dMin+", geschätzte Vollkosten "+eur(c.k20),"Range "+dMin+", estimated full costs "+eur(c.k20))}
+    ] : [
+      {k:T("Wertpunkte","Value points"), v:(aw===null?"–":num(c.punkte)), s:T("Keine Aufwertung: Eingriff, keine Kompensationsmaßnahme","No uplift: intervention, not a compensation measure")},
+      {k:T("Erlös","Revenue"), v:T("entfällt","n/a"), s:T("keine Wertpunkte","no value points")},
+      {k:T("Deckung der Vollkosten","Coverage of full costs"), v:T("entfällt","n/a"), s:T("geschätzte Vollkosten "+eur(c.k20),"estimated full costs "+eur(c.k20))}
+    ];
+    M.low = (pos && c.deckungMin<1) ? T("Im unteren Preisfall (0,50 € je Punkt) decken die Erlöse die geschätzten Vollkosten nicht.","In the low-price case (€0.50 per point), revenue does not cover the estimated full costs.") : "";
+
+    M.konst = [
+      [T("Ziele","Goals"), S.ziele.length ? S.ziele.map(function(z){ return zielText[z]; }).join(", ") : T("noch nicht benannt","not yet specified")],
+      [T("Ausgangsnutzung","Current land use"), (AUSGANG[S.nutzung] ? P(AUSGANG[S.nutzung].label) : T("noch nicht benannt","not yet specified"))+
+        (aw!==null ? T(", Ausgangswert "+nf1.format(aw)+" Punkte je m²",", initial value "+nf1.format(aw)+" points per m²")+
+          (eigenerWert() ? T(" (eigener Wert"+(richtwert()!==null?", Richtwert "+richtwert():"")+")"," (own value"+(richtwert()!==null?", guide value "+richtwert():"")+")") : (richtwert()!==null?T(" (Richtwert)"," (guide value)"):"")) : "")],
+      [T("Flächen","Areas"), flaechenText(c)]
+    ].concat(rolle());
+
+    var tei = [T("8 Grundausprägung","8 baseline")];
+    if(S.mosaik) tei.push(T("1 Nutzungsmosaik","1 harvest mosaic"));
+    if(S.mehrreihig) tei.push(T("1 Mehrreihigkeit","1 multi-row planting"));
+    if(S.a2==="mittel") tei.push(T("3 Umtriebszeit ab 10 Jahren","3 rotation period from 10 years"));
+    if(S.a2==="alt") tei.push(T("6 Überhälter","6 standard trees"));
+    if(S.arten) tei.push(T("2 Artenvielfalt","2 species diversity"));
+    if(S.gewaesser) tei.push(T("1 Gewässerlage","1 watercourse location"));
+    var capped = (8+achsenPunkte()) > c.deckel;
+    M.herl = [
+      [T("Zielwert Gehölzkern","Target value, woody core"), c.ziel+T(" Punkte (",(" points (")+"")+tei.join(" + ")+(capped?T("; gedeckelt bei ","; capped at ")+c.deckel:"")+")"],
+      [T("Entwicklungsdauer (Time-Lag)","Development time (time lag)"), T("Faktor "+nf1.format(c.tl)+": "+c.ziel+" geteilt durch "+nf1.format(c.tl)+" = "+nf1.format(c.anrechenbar)+" Punkte anrechenbar",
+         "Factor "+nf1.format(c.tl)+": "+c.ziel+" divided by "+nf1.format(c.tl)+" = "+nf1.format(c.anrechenbar)+" points creditable")],
+      [T("Saum","Margin strip"), c.fSaum>0 ? T(SAUMWERT+" Punkte ohne Time-Lag, "+m(c.b)+" je Seite",SAUMWERT+" points without time lag, "+m(c.b)+" per side") : T("kein anrechenbarer Saum","no creditable margin strip")]
+    ];
+
+    function d1(v){ return aw===null ? "–" : nf1.format(v); }
+    M.tabKopf = LANG==="en"
+      ? ["Part","Area","Creditable target value","Initial value","Uplift per m²","Value points"]
+      : ["Teilfläche","Fläche","Zielwert anrechenbar","Ausgangswert","Aufwertung je m²","Wertpunkte"];
+    M.tab = [[T("Gehölzkern","Woody core"), num(c.fKern)+" m²", nf1.format(c.anrechenbar), d1(aw), aw===null?"–":nf2.format(c.upKern), aw===null?"–":num(c.pKern)]];
+    if(c.fSaum>0) M.tab.push([T("Saum","Margin strip"), num(c.fSaum)+" m²", nf1.format(SAUMWERT), d1(aw), aw===null?"–":nf2.format(c.upSaum), aw===null?"–":num(c.pSaum)]);
+    M.tabSumme = [T("Gesamt","Total"), num(c.fGes)+" m²", "", "", "", aw===null?"–":num(c.punkte)];
+
+    M.geld = [
+      [T("Erlös","Revenue"), pos ? T("rund "+eur(c.eMid)+" im mittleren Preisfall (1,50 € je Punkt); Spanne "+eur(c.eMin)+" bis "+eur(c.eMax)+" bei 0,50 bis 3,00 € je Punkt",
+                                    "about "+eur(c.eMid)+" in the mid-price case (€1.50 per point); range "+eur(c.eMin)+" to "+eur(c.eMax)+" at €0.50 to €3.00 per point")
+                                 : T("entfällt, keine Aufwertung","n/a, no uplift")],
+      [T("Kosten, geschätzt","Costs, estimated"), T("Anlage und erstes Standjahr rund "+eur(c.kAnlage)+"; Vollkosten über 20 Jahre rund "+eur(c.k20)+". Mögliche Kosten nach einem einzelnen untersuchten Standort eines Forschungsvorhabens, keine Kalkulation.",
+                                                    "Establishment and first year about "+eur(c.kAnlage)+"; full costs over 20 years about "+eur(c.k20)+". Possible costs based on a single studied site of a research project, not a calculation.")],
+      [T("Deckung","Coverage"), pos ? T(pc(c.deckung*100)+" der geschätzten Vollkosten im mittleren Preisfall; Spanne "+dMin, pc(c.deckung*100)+" of the estimated full costs in the mid-price case; range "+dMin) : T("entfällt","n/a")]
+    ];
+
+    M.auflagen = auflagen();
+    M.klaeren = notes.map(function(x){ return {t:x.kurz}; })
+      .concat(FESTE_PUNKTE.map(function(p){ return {b:P(p[0]), t:P(p[1])}; }));
+    M.notiz = S.notiz.trim().split("\n").map(function(z){ return z.trim(); }).filter(Boolean);
+    return M;
+  }
+
+  function sheetHTML(){
+    var M = buildModel(), c = M.c;
+    var h = '<div class="flag note savebox no-print"><span class="tag">'+T("Hinweis","Note")+'</span>'+
+      '<div class="savetext"><b>'+T("Diese Seite speichert keine Eingaben.","This page does not store any entries.")+'</b> '+
+      T("Laden Sie das Ergebnisblatt jetzt als PDF herunter, bevor Sie die Seite schließen oder neu laden. Das PDF enthält nur das Ergebnisblatt, nicht den Mailentwurf.",
+        "Download the result sheet as a PDF now, before you close or reload the page. The PDF contains only the result sheet, not the draft email.")+
+      '<div class="nav" style="margin-top:9px"><button type="button" class="btn small pdfbtn">'+T("Ergebnisblatt als PDF herunterladen","Download result sheet as PDF")+'</button>'+
+      '<span class="counter pdfstate"></span></div></div></div>';
+
+    h += '<div class="sheet">';
+    h += '<div class="sheethead"><div><div class="eyebrow">'+T("Ergebnisblatt der Vorprüfung","Result sheet of the pre-check")+'</div>'+
+         '<h2 style="margin-top:6px">'+esc(M.gem)+'</h2>'+
+         '<div class="hint" style="margin:3px 0 0">'+T("Agroforst als Kompensation, Vorprüfung für Kommunen","Agroforestry as compensation: pre-check for municipalities")+'</div></div>'+
+         '<div class="sheetmeta">'+T("Rheinland-Pfalz<br>Stand Oktober 2026<br>Erstellt am ","Rhineland-Palatinate<br>Version October 2026<br>Created on ")+M.datum+'</div></div>';
+    h += '<div style="margin-top:12px"><span class="chip '+M.chip.k+'">'+M.chip.t+'</span></div>';
+    h += M.warns.map(function(x){
+      return '<div class="flag warn"><span class="tag">'+schrittName(x.schritt)+'</span><span class="ftxt">'+x.kurz+
+             '<button type="button" class="jump no-print" data-go="'+x.schritt+'">'+T("ändern","change")+'</button></span></div>';
+    }).join("");
+
+    h += '<div class="kpis">'+M.kpis.map(function(k){
+      return '<div class="kpi"><span class="k">'+k.k+'</span><span class="v">'+k.v+'</span><span class="s">'+k.s+'</span></div>';
+    }).join("")+'</div>';
+    if(M.low) h += '<div class="hint" style="margin:8px 0 0">'+M.low+'</div>';
+
+    h += '<h3>'+T("Angenommene Konstellation","Assumed constellation")+'</h3><div class="hint" style="margin:6px 0 0">'+T("Angaben aus dem Durchlauf. Sie sind Annahmen der Vorprüfung, keine Zusagen.","Entries from the run-through. They are assumptions of the pre-check, not commitments.")+'</div><dl class="kv">'+
+         M.konst.map(function(r){ var k = r[2] ? ' class="hl"' : ''; return '<dt'+k+'>'+r[0]+'</dt><dd'+k+'>'+r[1]+'</dd>'; }).join("")+'</dl>';
+
+    h += '<h3>'+T("Rechnerischer Überschlag","Calculated estimate")+'</h3><dl class="kv">'+
+         M.herl.map(function(r){ return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'; }).join("")+'</dl>';
+    h += '<div class="tblwrap"><table class="rtable stack"><caption>'+T("Rechenweg, Werte gerundet","Calculation, values rounded")+'</caption><thead><tr>'+
+         M.tabKopf.map(function(t,i){ return '<th'+(i>0?' class="r"':'')+'>'+t+'</th>'; }).join("")+'</tr></thead><tbody>'+
+         M.tab.map(function(r){ return '<tr>'+r.map(function(t,i){ return '<td'+(i>0?' class="r"':'')+' data-l="'+esc(M.tabKopf[i])+'">'+t+'</td>'; }).join("")+'</tr>'; }).join("")+
+         '<tr class="sum">'+M.tabSumme.map(function(t,i){ return (i>0 && t==="" ) ? '<td class="r e"></td>' : '<td'+(i>0?' class="r"':'')+' data-l="'+esc(M.tabKopf[i])+'">'+t+'</td>'; }).join("")+'</tr></tbody></table></div>';
+    h += '<dl class="kv" style="margin-top:14px">'+
+         M.geld.map(function(r){ return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'; }).join("")+'</dl>';
+
+    h += '<h3>'+T("Was im Pflanzplan festgeschrieben werden muss","What must be fixed in the planting plan")+'</h3><ul class="plain">'+
+      M.auflagen.map(function(a){ return '<li><span class="mark"></span><span>'+esc(a)+'</span></li>'; }).join("")+'</ul>';
+
+    h += '<h3>'+T("Zu klären in der Vorbesprechung","To be clarified in the preliminary discussion")+'</h3><ul class="plain">'+
+      M.klaeren.map(function(k){ return '<li><span class="mark"></span><span>'+(k.b?'<b>'+esc(k.b)+'</b> ':'')+esc(k.t)+'</span></li>'; }).join("")+'</ul>';
+
+    if(M.notiz.length){
+      h += '<h3>'+T("Anmerkungen der Kommune","Notes from the municipality")+'</h3><ul class="plain">'+
+        M.notiz.map(function(z){ return '<li><span class="mark"></span><span>'+esc(z)+'</span></li>'; }).join("")+'</ul>';
+    }
+
+    h += '<div class="sheetfoot">'+fussHTML()+'</div>';
+    h += '</div>';
+
+    h += '<div class="mailbox no-print"><h3>'+T("Mailentwurf an die untere Naturschutzbehörde","Draft email to the lower nature conservation authority")+'</h3>'+
+      '<div class="hint">'+T("Enthält das Wichtigste aus diesem Durchlauf. Der Entwurf ist nicht Teil des PDFs und wird nicht mitgedruckt.",
+        "Contains the key points of this run-through. The draft is not part of the PDF and is not printed. The authority will expect German: switch the page language to DE for the German version.")+'</div>'+
+      '<div class="nav" style="margin-top:10px"><button class="btn small" type="button" id="copyMail">'+T("Mailtext kopieren","Copy email text")+'</button>'+
+      '<span class="counter" id="copyState"></span></div>'+
+      '<div class="mailtext" id="mailText">'+esc(mailText())+'</div></div>';
+    return h;
+  }
+
+  /* ---------------------------------------------------------------- PDF */
+  function dateiname(){
+    var d = new Date();
+    function p(n){ return (n<10?"0":"")+n; }
+    var n = String(d.getFullYear()).slice(2)+" "+p(d.getMonth()+1)+" "+p(d.getDate())+" "+T("Vorprüfung Agroforst","Agroforestry pre-check");
+    if(S.gemeinde.trim()) n += " " + S.gemeinde.trim().replace(/[\\\/:*?"<>|]+/g," ").replace(/\s+/g," ").slice(0,60);
+    return n + ".pdf";
+  }
+
+  function pdfBauen(){
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if(!J) return null;
+    var M = buildModel(), c = M.c;
+    var doc = new J({unit:"mm", format:"a4", orientation:"portrait", compress:true});
+    var PW=210, PH=297, ML=18, MT=18, MB=22, CW=174, PT=0.3528, y=MT;
+    var K = {ink:[25,33,28], ink2:[71,84,76], ink3:[120,132,124], line:[221,227,222], acc:[31,122,82], accBg:[232,244,237],
+             warn:[158,59,44], warnBg:[251,238,235], tint:[242,246,243]};
+    function cl(s){ return String(s).replace(/[  ]/g," ").replace(/−/g,"-").replace(/m²/g,"m2").replace(/[“”]/g,'"').replace(/·/g,"-"); }
+    function tc(a){ doc.setTextColor(a[0],a[1],a[2]); }
+    function fc(a){ doc.setFillColor(a[0],a[1],a[2]); }
+    function dc(a){ doc.setDrawColor(a[0],a[1],a[2]); }
+    function ft(face,style,size){ doc.setFont(face,style); doc.setFontSize(size); }
+    function stp(size,k){ return size*PT*(k||1.4); }
+    function need(h){ if(y+h > PH-MB){ doc.addPage(); y = MT; } }
+    function base(size){ return size*PT*0.85; }
+
+    function para(t,size,colr,x,w,style,k){
+      ft("helvetica",style||"normal",size);
+      var ls = doc.splitTextToSize(cl(t), w), st = stp(size,k);
+      ls.forEach(function(l){
+        need(st); ft("helvetica",style||"normal",size); tc(colr);
+        doc.text(l, x, y+base(size)); y += st;
+      });
+    }
+    function runs(rs,x,w,size,colr,k){
+      var st = stp(size,k), toks = [], sp = false;
+      rs.forEach(function(r){
+        cl(r.t).split(" ").forEach(function(p,j){
+          if(p===""){ sp = true; return; }
+          toks.push({t:p, r:r, sp: sp || j>0});
+          sp = false;
+        });
+      });
+      function sty(r){ return r.b ? (r.i?"bolditalic":"bold") : (r.i?"italic":"normal"); }
+      var lines = [[]], cx = 0;
+      toks.forEach(function(t){
+        ft("helvetica", sty(t.r), size);
+        var tw = doc.getTextWidth(t.t), spw = doc.getTextWidth(" ");
+        var add = (cx>0 && t.sp) ? spw : 0;
+        if(cx>0 && cx+add+tw > w){ lines.push([]); cx = 0; add = 0; }
+        lines[lines.length-1].push({t:t.t, r:t.r, x:cx+add, w:tw});
+        cx += add+tw;
+      });
+      lines.forEach(function(ln){
+        need(st);
+        ln.forEach(function(wd){
+          ft("helvetica", sty(wd.r), size);
+          tc(wd.r.u ? K.acc : colr);
+          var b = y+base(size);
+          doc.text(wd.t, x+wd.x, b);
+          if(wd.r.u){
+            dc(K.acc); doc.setLineWidth(0.15);
+            doc.line(x+wd.x, b+0.5, x+wd.x+wd.w, b+0.5);
+            doc.link(x+wd.x, y, wd.w, st, {url:wd.r.u});
+          }
+        });
+        y += st;
+      });
+    }
+    function heading(t){
+      need(24); y += 5;
+      ft("times","normal",13); tc(K.ink); doc.text(cl(t), ML, y+4.2);
+      y += 6.4; dc(K.line); doc.setLineWidth(0.2); doc.line(ML, y, ML+CW, y); y += 2.6;
+    }
+    function kv(l,t,bold){
+      var size = 9, st = stp(size,1.4);
+      ft("helvetica",bold?"bold":"normal",size);
+      var ls = doc.splitTextToSize(cl(t), CW-47);
+      need(ls.length*st+1.5);
+      ft("helvetica",bold?"bold":"normal",8); tc(bold?K.acc:K.ink3); doc.text(cl(l), ML, y+base(size));
+      ft("helvetica",bold?"bold":"normal",size); tc(bold?K.ink:K.ink2);
+      ls.forEach(function(s,i){ doc.text(s, ML+47, y+base(size)+i*st); });
+      y += ls.length*st+1.5;
+    }
+    function bullets(items){
+      items.forEach(function(it){
+        need(stp(9,1.4)*2);
+        fc(K.acc); doc.circle(ML+1.1, y+2.0, 0.55, "F");
+        var rs = it.b ? [{t:it.b+" ", b:true},{t:it.t}] : [{t:it.t}];
+        runs(rs, ML+5, CW-5, 9, K.ink2, 1.4);
+        y += 1.3;
+      });
+    }
+    function chip(t,kind){
+      ft("helvetica","bold",8.5);
+      var tw = doc.getTextWidth(cl(t))+7, h = 6.4;
+      need(h+3);
+      var fcol = kind==="warn" ? K.warnBg : K.accBg, ccol = kind==="warn" ? K.warn : K.acc;
+      fc(fcol); dc(ccol); doc.setLineWidth(0.25); doc.roundedRect(ML, y, tw, h, 3.2, 3.2, "FD");
+      tc(ccol); doc.text(cl(t), ML+3.5, y+4.3); y += h+3;
+    }
+    function kpis(list){
+      var gap = 3, w = (CW-2*gap)/3, h = 25;
+      need(h+3);
+      list.forEach(function(k,i){
+        var x = ML+i*(w+gap);
+        fc(K.tint); dc(K.line); doc.setLineWidth(0.25); doc.roundedRect(x, y, w, h, 1.5, 1.5, "FD");
+        ft("helvetica","bold",6.5); tc(K.ink3); doc.text(cl(k.k).toUpperCase(), x+3.5, y+5);
+        ft("times","normal",17); tc(K.ink); doc.text(cl(k.v), x+3.5, y+13.5);
+        ft("helvetica","normal",7.2); tc(K.ink3);
+        doc.splitTextToSize(cl(k.s), w-7).slice(0,3).forEach(function(l,j){ doc.text(l, x+3.5, y+18.2+j*3.1); });
+      });
+      y += h+3;
+    }
+    function table(head, rows, sum, widths){
+      function cell(row, size, style, colr, lineTop){
+        var ls = row.map(function(t,i){ ft("helvetica",style,size); return doc.splitTextToSize(cl(t), widths[i]-2.5); });
+        var n = Math.max.apply(null, ls.map(function(a){ return a.length; }));
+        var h = n*stp(size,1.3)+2.6;
+        need(h);
+        if(lineTop){ dc(K.ink); doc.setLineWidth(0.3); doc.line(ML, y, ML+CW, y); }
+        var x = ML;
+        ls.forEach(function(a,i){
+          ft("helvetica",style,size); tc(colr);
+          a.forEach(function(l,k){
+            var ty = y+1.3+base(size)+k*stp(size,1.3);
+            if(i===0) doc.text(l, x, ty); else doc.text(l, x+widths[i]-1.2, ty, {align:"right"});
+          });
+          x += widths[i];
+        });
+        y += h;
+        if(!lineTop){ dc(K.line); doc.setLineWidth(0.2); doc.line(ML, y, ML+CW, y); }
+      }
+      need(30);
+      cell(head.map(function(t){ return cl(t).toUpperCase(); }), 6.8, "bold", K.ink3, false);
+      rows.forEach(function(r){ cell(r, 8.8, "normal", K.ink2, false); });
+      cell(sum, 9, "bold", K.ink, true);
+      y += 2;
+    }
+
+    ft("helvetica","bold",7.5); tc(K.acc);
+    doc.text(T("ERGEBNISBLATT DER VORPRÜFUNG","RESULT SHEET OF THE PRE-CHECK"), ML, y+2.2);
+    ft("helvetica","normal",8); tc(K.ink3);
+    [T("Rheinland-Pfalz","Rhineland-Palatinate"),T("Stand Oktober 2026","Version October 2026"),T("Erstellt am ","Created on ")+M.datum].forEach(function(t,i){
+      doc.text(t, PW-ML, y+2.2+i*3.8, {align:"right"});
+    });
+    y += 8;
+    ft("times","normal",20); tc(K.ink);
+    doc.splitTextToSize(cl(M.gem), CW-45).forEach(function(l){ doc.text(l, ML, y+base(20)); y += stp(20,1.2); });
+    ft("helvetica","normal",9); tc(K.ink3);
+    doc.text(T("Agroforst als Kompensation, Vorprüfung für Kommunen","Agroforestry as compensation: pre-check for municipalities"), ML, y+base(9)); y += 6;
+    chip(M.chip.t, M.chip.k);
+    M.warns.forEach(function(x){
+      para(T("Achtung, ","Warning, ")+schrittName(x.schritt)+": "+x.kurz, 9, K.warn, ML, CW, "normal", 1.4);
+    });
+    y += 2;
+    kpis(M.kpis);
+    if(M.low) para(M.low, 8.5, K.ink3, ML, CW, "normal", 1.4);
+
+    heading(T("Angenommene Konstellation","Assumed constellation"));
+    para(T("Angaben aus dem Durchlauf. Sie sind Annahmen der Vorprüfung, keine Zusagen.","Entries from the run-through. They are assumptions of the pre-check, not commitments."), 8.5, K.ink3, ML, CW, "normal", 1.4);
+    y += 1.5;
+    M.konst.forEach(function(r){ kv(r[0], r[1], r[2]); });
+
+    heading(T("Rechnerischer Überschlag","Calculated estimate"));
+    M.herl.forEach(function(r){ kv(r[0], r[1]); });
+    y += 2;
+    table(M.tabKopf, M.tab, M.tabSumme, [40,26,28,26,28,26]);
+    para(T("Werte gerundet. Die Wertpunkte ergeben sich aus Fläche mal Aufwertung je m².","Values rounded. The value points result from area times uplift per m²."), 7.8, K.ink3, ML, CW, "normal", 1.4);
+    y += 2;
+    M.geld.forEach(function(r){ kv(r[0], r[1]); });
+
+    heading(T("Was im Pflanzplan festgeschrieben werden muss","What must be fixed in the planting plan"));
+    bullets(M.auflagen.map(function(a){ return {t:a}; }));
+
+    heading(T("Zu klären in der Vorbesprechung","To be clarified in the preliminary discussion"));
+    bullets(M.klaeren);
+
+    if(M.notiz.length){
+      heading(T("Anmerkungen der Kommune","Notes from the municipality"));
+      bullets(M.notiz.map(function(z){ return {t:z}; }));
+    }
+
+    need(46); y += 6;
+    dc(K.ink); doc.setLineWidth(0.3); doc.line(ML, y, ML+CW, y); y += 3.2;
+    fuss().forEach(function(p){ runs(p, ML, CW, 7.4, K.ink3, 1.45); y += 1.6; });
+
+    var n = doc.getNumberOfPages();
+    for(var i=1;i<=n;i++){
+      doc.setPage(i);
+      dc(K.line); doc.setLineWidth(0.2); doc.line(ML, PH-14, ML+CW, PH-14);
+      ft("helvetica","normal",7.5); tc(K.ink3);
+      doc.text(cl(T("Vorprüfung Agroforst als Kompensation, ","Agroforestry as compensation: pre-check, ")+M.gem+T(", Stand Oktober 2026",", version October 2026")), ML, PH-10.5);
+      doc.text(T("Seite ","Page ")+i+T(" von "," of ")+n, PW-ML, PH-10.5, {align:"right"});
+    }
+    return doc;
+  }
+
+  function pdfDownload(){
+    var states = document.querySelectorAll(".pdfstate");
+    function say(t){ Array.prototype.forEach.call(states, function(s){ s.textContent = t; }); }
+    var doc = null;
+    try{ doc = pdfBauen(); }catch(e){ doc = null; }
+    if(!doc){ say(T("Das PDF konnte nicht erstellt werden. Bitte im Browser über Drucken (Strg+P) als PDF speichern.","The PDF could not be created. Please use your browser's print function (Ctrl+P) to save as PDF.")); return; }
+    var name = dateiname(), ab = doc.output("arraybuffer");
+    function direkt(){
+      try{ doc.save(name); say(T("PDF wird gespeichert. Falls kein Download startet, öffnen Sie die Seite direkt im Browser.","Saving PDF. If no download starts, open the page directly in your browser.")); }
+      catch(e){ say(T("Speichern nicht möglich. Bitte im Browser über Drucken (Strg+P) als PDF speichern.","Saving is not possible. Please use your browser's print function (Ctrl+P) to save as PDF.")); }
+    }
+    if(window.claude && typeof window.claude.use === "function"){
+      window.claude.use("downloads").then(function(d){
+        if(!d){ direkt(); return; }
+        d.save({filename:name, data:ab}).then(
+          function(){ say(T("PDF gespeichert.","PDF saved.")); },
+          function(err){ say(err && err.code==="declined" ? T("Speichern abgebrochen.","Saving cancelled.") : T("Speichern in dieser Ansicht nicht möglich. Bitte die Seite direkt im Browser öffnen.","Saving is not possible in this view. Please open the page directly in your browser.")); }
+        );
+      }, direkt);
+    } else direkt();
+  }
+
+  /* ---------------------------------------------------------------- Rahmen */
+  function chrome(){
+    document.documentElement.lang = LANG;
+    document.title = T("Agroforst Vorprüfung","Agroforestry pre-check");
+    function set(id, html){ var n = document.getElementById(id); if(n) n.innerHTML = html; }
+    set("brandline", T("Entscheidungswerkzeug","Decision tool"));
+    set("title", T("Agroforst als Kompensation: Vorprüfung für Kommunen","Agroforestry as compensation: pre-check for municipalities"));
+    set("standnote", T("Oktober 2026<br>Rheinland-Pfalz","October 2026<br>Rhineland-Palatinate"));
+    set("lede", T("In 5 Schritten zur Einschätzung, ob eine Kommune ein Agroforstsystem über produktionsintegrierte Kompensation anstoßen und finanzieren kann. Sie können zwischen den Schritten wechseln; die Eingaben bleiben erhalten, solange diese Seite geöffnet ist. Gespeichert wird nichts. Am Ende laden Sie das Ergebnisblatt als PDF herunter.",
+      "In 5 steps to an assessment of whether a municipality can initiate and finance an agroforestry system through production-integrated compensation. You can move between the steps; your entries are kept for as long as this page stays open. Nothing is stored. At the end you download the result sheet as a PDF."));
+    set("scope", T("<b>Rechengrundlage: Biotopwertliste Rheinland-Pfalz</b>, Punkteskala 0 bis 24, in Aufbau und Skala der Bundeskompensationsverordnung (BKompV) sehr ähnlich. Aus anderen Bundesländern lässt sich das Werkzeug zur Orientierung nutzen; die Punkte sind nicht übertragbar.",
+      "<b>Calculation basis: biotope value list of Rhineland-Palatinate</b>, point scale 0 to 24, very similar in structure and scale to the Federal Compensation Ordinance (BKompV). The tool can be used for orientation in other federal states; the points are not transferable."));
+    document.getElementById("rail").setAttribute("aria-label", T("Schritte","Steps"));
+    document.getElementById("pagefoot").innerHTML = fussHTML();
+    ["de","en"].forEach(function(l){
+      var b = document.getElementById("lang-"+l);
+      if(b) b.setAttribute("aria-pressed", String(l===LANG));
+    });
+  }
+
+  function render(){
+    document.getElementById("progress").style.width = Math.round((step/5)*100) + "%";
+    document.getElementById("pagefoot").hidden = (step===5);
+
+    var rail = document.getElementById("rail");
+    rail.innerHTML = "";
+    steps().forEach(function(name,i){
+      var offen = (i<4 && i<=maxReached) ? hinweise(i).length : 0;
+      var b = el("button",{class:"railitem", type:"button", "data-seen":(i<=maxReached?"1":"0"),
+        "aria-current":(i===step?"true":"false")},
+        '<span class="b">'+(i===5?"✓":(i+1))+'</span><span class="t">'+name+'</span>'+(offen?'<span class="dot"></span>':''));
+      b.addEventListener("click", function(){ go(i); });
+      rail.appendChild(b);
+    });
+
+    var main = document.getElementById("main");
+    main.innerHTML = (step===5) ? sheetHTML() : '<section class="panel">'+panelHTML(step)+'</section>';
+
+    var nav = el("div",{class:"nav no-print"});
+    if(step>0){
+      var back = el("button",{class:"btn ghost",type:"button"},T("Zurück","Back"));
+      back.addEventListener("click", function(){ go(step-1); });
+      nav.appendChild(back);
+    }
+    if(step<5){
+      var next = el("button",{class:"btn",type:"button"}, step===4 ? T("Ergebnisblatt","Result sheet") : T("Weiter","Next"));
+      next.disabled = !fertig(step);
+      next.addEventListener("click", function(){ go(step+1); });
+      nav.appendChild(next);
+      nav.appendChild(el("span",{class:"spacer"}));
+      nav.appendChild(el("span",{class:"counter", id:"fehlt"}, fertig(step) ? "" : fehltText(step)));
+    } else {
+      var dl = el("button",{class:"btn pdfbtn",type:"button"},T("Ergebnisblatt als PDF herunterladen","Download result sheet as PDF"));
+      nav.appendChild(dl);
+      var again = el("button",{class:"btn ghost",type:"button"},T("Neu beginnen","Start over"));
+      again.addEventListener("click", function(){ S = leer(); maxReached = 0; go(0); });
+      nav.appendChild(again);
+      nav.appendChild(el("span",{class:"counter pdfstate"},""));
+    }
+    main.appendChild(nav);
+    bind();
+  }
+
+  function go(i){
+    step = i; maxReached = Math.max(maxReached, i); render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function navState(){
+    var nextBtn = document.querySelector("#main .nav .btn:not(.ghost)");
+    if(nextBtn && step<5) nextBtn.disabled = !fertig(step);
+    var f = document.getElementById("fehlt");
+    if(f) f.textContent = fertig(step) ? "" : fehltText(step);
+  }
+
+  function refresh(){
+    var active = document.activeElement, id = active ? active.id : null;
+    var pos = null;
+    try{ if(active && active.selectionStart!==undefined) pos = active.selectionStart; }catch(e){}
+    var sec = document.querySelector("#main .panel");
+    if(!sec){ render(); return; }
+    sec.innerHTML = panelHTML(step);
+    navState();
+    document.getElementById("progress").style.width = Math.round((step/5)*100) + "%";
+    bind();
+    if(id){
+      var again = document.getElementById(id);
+      if(again){ again.focus(); try{ if(pos!==null) again.setSelectionRange(pos,pos); }catch(e){} }
+    }
+  }
+
+  function nurRechnung(){
+    var box = document.getElementById("calcOut");
+    if(!box){ refresh(); return; }
+    box.innerHTML = calcOutHTML();
+    navState();
+  }
+
+  function setLang(l){
+    if(l===LANG) return;
+    LANG = l; setFormats(); chrome(); render();
+    try{ history.replaceState(null,"",(location.pathname||"")+(l==="en"?"?lang=en":"")); }catch(e){}
+  }
+
+  function bind(){
+    var main = document.getElementById("main");
+
+    main.querySelectorAll('input[type=radio]').forEach(function(r){
+      r.addEventListener("change", function(){
+        S[r.name] = r.value;
+        if(r.name==="a2") S.timeLag = null;
+        if(r.name==="nutzung"){ var rw = richtwert(); S.wertManuell = rw===null ? "" : String(rw); }
+        refresh();
+      });
+    });
+    main.querySelectorAll('input[name=ziele]').forEach(function(c){
+      c.addEventListener("change", function(){
+        var i = S.ziele.indexOf(c.value);
+        if(c.checked && i<0) S.ziele.push(c.value);
+        if(!c.checked && i>=0) S.ziele.splice(i,1);
+        refresh();
+      });
+    });
+    main.querySelectorAll('input[name=achsen]').forEach(function(c){
+      c.addEventListener("change", function(){ S[c.value] = c.checked; refresh(); });
+    });
+
+    ["laenge","breite","schlag","anzahl"].forEach(function(id){
+      var n = document.getElementById(id);
+      if(!n) return;
+      n.addEventListener("input", function(){
+        S[id] = n.value;
+        if(id==="breite"){
+          var erlaubt = SAUM_OPT.slice().reverse().filter(function(b){ return b>0 && 2*b < zahl(S.breite); });
+          if(zahl(S.saum) > 0 && erlaubt.indexOf(zahl(S.saum)) < 0) S.saum = erlaubt.length ? erlaubt[0] : 0;
+          var sel = document.getElementById("saum");
+          if(sel){
+            Array.prototype.forEach.call(sel.options, function(op){
+              var b = zahl(op.value);
+              op.disabled = (b>0 && 2*b >= zahl(S.breite));
+            });
+            sel.value = String(S.saum);
+          }
+        }
+        nurRechnung();
+      });
+    });
+    var wm = document.getElementById("wertManuell");
+    if(wm) wm.addEventListener("input", function(){ S.wertManuell = wm.value; navState(); });
+    var sa = document.getElementById("saum");
+    if(sa) sa.addEventListener("change", function(){ S.saum = zahl(sa.value); nurRechnung(); });
+    var tl = document.getElementById("timeLag");
+    if(tl) tl.addEventListener("change", function(){ S.timeLag = zahl(tl.value); nurRechnung(); });
+
+    var g = document.getElementById("gemeinde");
+    if(g) g.addEventListener("input", function(){ S.gemeinde = g.value; });
+    var nz = document.getElementById("notiz");
+    if(nz) nz.addEventListener("input", function(){ S.notiz = nz.value; });
+
+    main.querySelectorAll(".pdfbtn").forEach(function(b){ b.addEventListener("click", pdfDownload); });
+    main.querySelectorAll("button.jump").forEach(function(b){
+      b.addEventListener("click", function(){ go(zahl(b.getAttribute("data-go"))); });
+    });
+
+    var cp = document.getElementById("copyMail");
+    if(cp) cp.addEventListener("click", function(){
+      var txt = mailText(), state = document.getElementById("copyState");
+      function ok(){ if(state) state.textContent = T("Kopiert.","Copied."); }
+      function fallback(){
+        var box = document.getElementById("mailText");
+        try{
+          var r = document.createRange(); r.selectNodeContents(box);
+          var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          if(state) state.textContent = T("Text ist markiert, bitte mit Strg+C kopieren.","Text is selected, please copy with Ctrl+C.");
+        }catch(e){ if(state) state.textContent = T("Bitte den Text von Hand markieren und kopieren.","Please select and copy the text manually."); }
+      }
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(ok, fallback);
+        } else fallback();
+      }catch(e){ fallback(); }
+    });
+  }
+
+  document.getElementById("lang-de").addEventListener("click", function(){ setLang("de"); });
+  document.getElementById("lang-en").addEventListener("click", function(){ setLang("en"); });
+  chrome();
+  render();
+})();
+
+</script>
+</body>
+</html>
