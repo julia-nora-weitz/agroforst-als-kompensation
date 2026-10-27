@@ -309,6 +309,8 @@ label.f.miss input{border-color:var(--warn);outline:2px solid var(--warn-line)}
 .dlcard .btn,.dlcard a.btn{align-self:flex-start}
 .dlcard .dlbtn{margin-top:auto;padding-top:6px}
 .dlstate{margin:-8px 0 16px;min-height:1.4em}
+.ohne{margin-top:8px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.ohne .jump{margin-right:2px}
 a.btn{display:inline-block;text-decoration:none;font:inherit;font-size:14px;font-weight:650;padding:10px 20px;border-radius:5px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
 a.btn.small{font-size:12.5px;padding:7px 13px}
 .sheetmeta .nowg{margin-top:6px;font-weight:700;color:var(--ink-2)}
@@ -739,7 +741,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
           T("Mit der zuständigen unteren Naturschutzbehörde ist abzustimmen, ob Gehölze mit dem Schutzzweck vereinbar sind.",
             "It has to be agreed with the competent lower nature conservation authority whether woody plants are compatible with the protection purpose."),
           T("Offenland- oder Rastvogelgebiet: Vereinbarkeit mit dem Schutzzweck mit der UNB abstimmen.","Open-country or resting-bird area: agree compatibility with the protection purpose with the UNB."));
-      if(S.offenland==="unklar")
+      if(S.offenland==="unklar" || !S.offenland)
         warn("H-2","offenland",
           lanis,
           T("Offenland- oder Rastvogelgebiet noch nicht geprüft: vor der Anfrage klären.","Open-country or resting-bird area not yet checked: clarify before the enquiry."));
@@ -748,11 +750,11 @@ h1{hyphens:auto;-webkit-hyphens:auto}
           T("Gesetzlich geschütztes Biotop auf der Fläche: bitte mit der zuständigen unteren Naturschutzbehörde abstimmen.",
             "Legally protected biotope on the site: please agree with the competent lower nature conservation authority."),
           T("Gesetzlich geschütztes Biotop: mit der UNB abstimmen.","Legally protected biotope: agree with the UNB."));
-      if(S.biotop==="unklar")
+      if(S.biotop==="unklar" || !S.biotop)
         warn("H-4","biotop",
           lanis,
           T("Geschütztes Biotop noch nicht geprüft: vor der Anfrage klären.","Protected biotope not yet checked: clarify before the enquiry."));
-      if(S.verfuegbar==="nein" || S.verfuegbar==="offen")
+      if(S.verfuegbar!=="ja")
         note(S.verfuegbar==="nein" ? "H-9" : "H-10","verfuegbar",
           T("Ein Flächenwechsel ist bei produktionsintegrierten Maßnahmen grundsätzlich möglich, muss aber von vornherein mitbedacht und mit der Behörde geregelt werden.",
             "A change of site is in principle possible for production-integrated measures, but must be considered from the start and agreed with the authority."),
@@ -763,7 +765,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
                  "The site is not available for the entire period of the intervention. A change of site is in principle possible for production-integrated measures, but must be considered from the start and agreed with the authority.")
              : T("Ob die Fläche über den gesamten Zeitraum des Eingriffs verfügbar ist, ist noch offen. Klären Sie das möglichst vor der Anfrage; ein Flächenwechsel ist grundsätzlich möglich, muss aber von vornherein mit der Behörde geregelt werden.",
                  "Whether the site is available for the entire period of the intervention is still open. Clarify this if possible before the enquiry; a change of site is in principle possible, but must be agreed with the authority from the outset.")});
-      if(S.gapdzv==="nein" || S.gapdzv==="unklar")
+      if(S.gapdzv!=="ja")
         note("H-11","gapdzv",
           T("Vorausgesetzt wird die Agroforstdefinition der GAPDZV. Die Einhaltung der Öko-Regelung 3 ist nicht zwingend erforderlich, für die Kommunikation der Maßnahme mit der unteren Naturschutzbehörde aber meist hilfreich.",
             "The agroforestry definition of the GAPDZV is assumed. Compliance with Eco-Scheme 3 is not strictly required, but is usually helpful for communicating the measure to the lower nature conservation authority."),
@@ -872,15 +874,13 @@ h1{hyphens:auto;-webkit-hyphens:auto}
   }
 
   /* Fehlende Pflichtangaben je Schritt (Schlüssel = data-need der Frage); das Feld "Lage" ist nie Pflicht */
+  /* Pflicht sind nur Ausgangsnutzung, Ausgangswert, Breite und Länge bzw. Schlaggröße und Streifenzahl; das Feld "Lage" ist nie Pflicht */
   function fehlend(i){
     var f = [];
-    if(i===0){ if(!S.ziele.length) f.push("ziele"); }
     if(i===1){
       if(!S.nutzung) f.push("nutzung");
       else if(ausgangswert()===null) f.push("wertManuell");
-      ["offenland","biotop","verfuegbar","gapdzv"].forEach(function(k){ if(!S[k]) f.push(k); });
     }
-    if(i===2) ["eigentum","dienstleister","waerme"].forEach(function(k){ if(!S[k]) f.push(k); });
     if(i===3){
       if(S.eingabe==="flaeche"){
         if(!(zahl(S.schlag)>0)) f.push("schlag");
@@ -891,8 +891,21 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     return f;
   }
   function fertig(i){ return fehlend(i).length===0; }
+  /* freiwillige Fragen, die leer markiert werden und im Ergebnis als "Ohne Angabe" erscheinen */
+  var FREIWILLIG_LEER = {offenland:1, biotop:1, verfuegbar:1, gapdzv:1};
+  function freiwilligLeer(i){
+    var f = [];
+    if(i===0 && !S.ziele.length) f.push("ziele");
+    if(i===1) ["offenland","biotop","verfuegbar","gapdzv"].forEach(function(k){ if(!S[k]) f.push(k); });
+    if(i===2 && !S.eigentum) f.push("eigentum");
+    return f;
+  }
+  function frageName(k){
+    return {ziele:T("Ziele","Goals"), offenland:T("Offenland- oder Rastvogelgebiet","Open-country or resting-bird area"), biotop:T("Gesetzlich geschütztes Biotop","Legally protected biotope"),
+            verfuegbar:T("Verfügbarkeit","Availability"), gapdzv:T("Öko-Regelung 3","Eco-Scheme 3"), eigentum:T("Eigentum","Ownership")}[k];
+  }
   function markUpdate(){
-    var miss = pruefen ? fehlend(step) : [];
+    var miss = (pruefen ? fehlend(step) : []).concat(step<5 ? freiwilligLeer(step) : []);
     var nodes = document.querySelectorAll("#main [data-need]");
     Array.prototype.forEach.call(nodes, function(n){
       var k = n.getAttribute("data-need"), on = miss.indexOf(k)>=0;
@@ -972,7 +985,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     });
     return h + '</div>';
   }
-  function fq(i,keys){ return flagsFor(hinweise(i).filter(function(x){ return keys.indexOf(x.q)>=0; })); }
+  function fq(i,keys){ return flagsFor(hinweise(i).filter(function(x){ return keys.indexOf(x.q)>=0 && !(FREIWILLIG_LEER[x.q] && S[x.q]===""); })); }
   function flagsFor(list){
     return list.map(function(h){
       return '<div class="flag '+h.art+'"><span class="tag">'+(h.art==="warn"?T("Achtung","Warning"):T("Hinweis","Note"))+'</span><span class="ftxt">'+h.text+'</span></div>';
@@ -1356,7 +1369,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     M.low = (pos && c.deckungMin<1) ? T("Im unteren Preisfall (0,50 € je Punkt) decken die Erlöse die geschätzten Vollkosten nicht.","In the low-price case (€0.50 per point), revenue does not cover the estimated full costs.") : "";
 
     var konst = [
-      [T("Ziele","Goals"), S.ziele.length ? S.ziele.map(function(z){ return zielText[z]; }).join(", ") : T("noch nicht benannt","not yet specified")],
+      [T("Ziele","Goals"), S.ziele.length ? S.ziele.map(function(z){ return zielText[z]; }).join(", ") : T("noch nicht angegeben","not yet given")],
       [T("Ausgangsnutzung","Current land use"), (AUSGANG[S.nutzung] ? P(AUSGANG[S.nutzung].label) : T("noch nicht benannt","not yet specified"))+
         (aw!==null ? T(", Ausgangswert "+nf1.format(aw)+" Punkte je m²",", initial value "+nf1.format(aw)+" points per m²")+
           (eigenerWert() ? T(" (eigener Wert"+(richtwert()!==null?", Richtwert "+richtwert():"")+")"," (own value"+(richtwert()!==null?", guide value "+richtwert():"")+")") : (richtwert()!==null?T(" (Richtwert)"," (guide value)"):"")) : "")]
@@ -1543,6 +1556,12 @@ h1{hyphens:auto;-webkit-hyphens:auto}
       return '<div class="flag warn"><span class="tag">'+schrittName(x.schritt)+'</span><span class="ftxt">'+x.kurz+
              '<button type="button" class="jump no-print" data-go="'+x.schritt+'">'+T("ändern","change")+'</button></span></div>';
     }).join("");
+    var ohne = [];
+    [0,1,2].forEach(function(i){ freiwilligLeer(i).forEach(function(k){ ohne.push({k:k, i:i}); }); });
+    if(ohne.length)
+      h += '<div class="ohne no-print">'+T("Ohne Angabe: ","Not given: ")+ohne.map(function(o){
+        return esc(frageName(o.k))+' ('+T("Schritt ","step ")+(o.i+1)+')<button type="button" class="jump" data-go="'+o.i+'">'+T("ändern","change")+'</button>';
+      }).join("; ")+'</div>';
 
     h += '<div class="kpis">'+M.kpis.map(function(k){
       return '<div class="kpi"><span class="k">'+k.k+'</span><span class="v">'+k.v+'</span><span class="s">'+k.s+'</span></div>';
@@ -1891,13 +1910,14 @@ h1{hyphens:auto;-webkit-hyphens:auto}
         else if(it.tab){ k.skip(1); k.tableG(it.tab.head, it.tab.rows, it.tab.w, it.tab.al, 8.2); }
       });
     }
-    block("1", T("Ausgangszustand","Initial condition"), Z.s1);
-    block("2", T("Ziele","Goals"), Z.s2);
-    block("3", T("Geplante Ausgestaltung","Planned design"), Z.s3);
-    k.need(48);
-    block("4", T("Bewertungsansatz","Assessment approach"), Z.s4);
-    if(Z.s5.length) block("5", T("Umsetzung und Sicherung","Implementation and legal securing"), Z.s5);
-    k.heading("6 "+T("Unser Anliegen","Our concern"));
+    var nr = 0;
+    block(++nr, T("Ausgangszustand","Initial condition"), Z.s1);
+    block(++nr, T("Ziele","Goals"), Z.s2);
+    block(++nr, T("Geplante Ausgestaltung","Planned design"), Z.s3);
+    k.need(78);
+    block(++nr, T("Bewertungsansatz","Assessment approach"), Z.s4);
+    if(Z.s5.length) block(++nr, T("Umsetzung und Sicherung","Implementation and legal securing"), Z.s5);
+    k.heading((++nr)+" "+T("Unser Anliegen","Our concern"));
     k.para(Z.s6a, 9.5, K.ink2, ML, CW, "normal", 1.4); k.skip(1.5);
     if(Z.s6.length){
       k.para(T("Gemeinsam betrachten möchten wir außerdem:","In addition, we would like to look at the following together:"), 9.5, K.ink2, ML, CW, "normal", 1.4);
@@ -2016,7 +2036,8 @@ h1{hyphens:auto;-webkit-hyphens:auto}
   function navState(){
     markUpdate();
     var f = document.getElementById("fehlt");
-    if(f) f.textContent = (pruefen && !fertig(step)) ? T("Bitte die markierten Angaben ergänzen","Please complete the marked entries") : "";
+    if(f) f.textContent = (pruefen && !fertig(step)) ? T("Bitte die markierten Angaben ergänzen","Please complete the marked entries")
+      : (step<5 && freiwilligLeer(step).length ? T("Einige Angaben fehlen noch. Sie können trotzdem weitergehen; je mehr Sie eingeben, desto besser ist das Ergebnis auf Ihre Maßnahme zugeschnitten.","Some entries are still missing. You can still continue; the more you enter, the better the result is tailored to your measure.") : "");
   }
 
   function refresh(){
