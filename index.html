@@ -291,6 +291,14 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
 .standnote a{color:var(--ink-3)}
 .costbox{margin-top:14px;border:1px solid var(--line);border-radius:5px;padding:12px 14px;background:var(--surface);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
 .costbox b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:4px}
+.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:620px){.fields.two{grid-template-columns:minmax(0,1fr)}}
+label.f.soft{color:var(--ink-3);font-weight:500}
+label.f.soft .u{color:var(--ink-3)}
+.missmsg{display:none;color:var(--warn);font-size:12px;font-weight:700;margin:0 0 6px}
+.miss .missmsg{display:block}
+fieldset.miss{outline:2px solid var(--warn);outline-offset:6px;border-radius:5px}
+label.f.miss input{border-color:var(--warn);outline:2px solid var(--warn-line)}
 .sheet{min-width:0}
 .sheet,.sheet *{overflow-wrap:anywhere}
 .sheetmeta{white-space:normal}
@@ -374,8 +382,8 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
   /* ---------------------------------------------------------------- Daten */
   var AUSGANG = {
     acker:      {label:["Acker","Arable land"], wert:6, spanne:["Richtwert 6 Punkte","guide value 6 points"]},
-    gruenGering:{label:["Grünland, geringwertig","Grassland, low value"], wert:8, spanne:["Spanne 8 bis 11, vorbelegt mit 8","range 8 to 11, preset to 8"]},
-    gruenHoch:  {label:["Grünland, hochwertig","Grassland, high value"], wert:14, spanne:["Spanne 12 bis 18, vorbelegt mit 14","range 12 to 18, preset to 14"]},
+    gruenGering:{label:["Intensiv genutztes Grünland","Intensively used grassland"], wert:8, spanne:["Spanne ca. 7 bis 10, vorbelegt mit 8","range approx. 7 to 10, preset to 8"]},
+    gruenHoch:  {label:["Artenreiches Grünland","Species-rich grassland"], wert:14, spanne:["Spanne ca. 12 bis 20, vorbelegt mit 14","range approx. 12 to 20, preset to 14"]},
     dauer:      {label:["Dauerkultur","Permanent crop"], wert:null, spanne:["Ausgangswert selbst eintragen","enter the initial value yourself"]}
   };
   var SAUMWERT = 16;
@@ -473,16 +481,16 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
   /* ---------------------------------------------------------------- Zustand */
   function leer(){
     return {
-      gemeinde:"", ziele:[],
+      gemeinde:"", lage:"", ziele:[],
       nutzung:"", wertManuell:"", offenland:"", biotop:"", verfuegbar:"", gapdzv:"",
-      eigentum:"", betrieb:"", kapazitaet:"", waerme:"",
+      eigentum:"", dienstleister:"", waerme:"",
       mosaik:false, mehrreihig:false, a2:"keine", arten:false, gewaesser:false,
       eingabe:"flaeche", schlag:5, anzahl:3, laenge:1200, breite:12, saum:2, timeLag:null,
       notiz:""
     };
   }
   var S = leer();
-  var step = 0, maxReached = 0;
+  var step = 0, maxReached = 0, pruefen = false;
   function steps(){ return LANG==="en"
     ? ["Purpose","Site","Responsible body","Scale","Pre-consultation","Result"]
     : ["Anlass","Fläche","Träger","Größenordnung","Vorabstimmung","Ergebnis"]; }
@@ -573,40 +581,42 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
           T("Rein ertragsorientierte Planung: Finanzierung über Naturschutzleistungen in der Regel nicht möglich.","Purely yield-oriented planning: financing through nature conservation services generally not possible."));
     }
     if(i===1){
+      var lanis = T(" Prüfen lässt sich das z. B. im Landschaftsinformationssystem der Naturschutzverwaltung Rheinland-Pfalz (LANIS)."," This can be checked, for example, in the landscape information system of the nature conservation administration of Rhineland-Palatinate (LANIS).");
       if(S.nutzung==="gruenHoch")
         note("nutzung",
-          T("Auf hochwertigem Grünland liegt der Ausgangswert bereits nahe am erreichbaren Zielwert. Tragen Sie möglichst den kartierten Wert ein. Die Bilanz trägt dort meist nur über den Saum oder über eine zusätzliche Aufwertung der Hauptkultur.",
-            "On high-value grassland the initial value is already close to the achievable target value. Enter the mapped value if possible. The balance there is usually positive only through the margin strip or through an additional uplift of the main crop."),
-          T("Hochwertiges Grünland: Ausgangswert nahe am Zielwert.","High-value grassland: initial value close to the target value."));
-      if(S.offenland==="ja" || S.offenland==="unklar")
+          T("Auf artenreichem Grünland liegt der Ausgangswert bereits nahe am erreichbaren Zielwert. Tragen Sie möglichst den kartierten Wert ein. Die Bilanz trägt dort meist nur über den Saum oder über eine zusätzliche Aufwertung der Hauptkultur.",
+            "On species-rich grassland the initial value is already close to the achievable target value. Enter the mapped value if possible. The balance there is usually positive only through the margin strip or through an additional uplift of the main crop."),
+          T("Artenreiches Grünland: Ausgangswert nahe am Zielwert.","Species-rich grassland: initial value close to the target value."));
+      if(S.offenland==="ja")
         warn("offenland",
-          T("Mit der zuständigen unteren Naturschutzbehörde ist abzustimmen, ob Gehölze dem Schutzzweck entgegenstehen.",
-            "Coordinate with the competent lower nature conservation authority whether woody plants conflict with the protection purpose."),
-          T("Offenland- oder Rastvogelgebiet: Schutzzweck mit der UNB abstimmen.","Open-country or resting-bird area: coordinate the protection purpose with the UNB."));
-      if(S.biotop==="ja" || S.biotop==="unklar")
+          T("Mit der zuständigen unteren Naturschutzbehörde ist abzustimmen, ob Gehölze mit dem Schutzzweck vereinbar sind.",
+            "It has to be agreed with the competent lower nature conservation authority whether woody plants are compatible with the protection purpose."),
+          T("Offenland- oder Rastvogelgebiet: Vereinbarkeit mit dem Schutzzweck mit der UNB abstimmen.","Open-country or resting-bird area: agree compatibility with the protection purpose with the UNB."));
+      if(S.offenland==="unklar")
+        warn("offenland",
+          T("Ob die Fläche in einem Offenland- oder Rastvogelgebiet liegt, ist noch nicht geprüft. Klären Sie das vor einer Anfrage bei der unteren Naturschutzbehörde.",
+            "Whether the site lies in an open-country or resting-bird area has not yet been checked. Clarify this before making an enquiry to the lower nature conservation authority.")+lanis,
+          T("Offenland- oder Rastvogelgebiet noch nicht geprüft: vor der Anfrage klären.","Open-country or resting-bird area not yet checked: clarify before the enquiry."));
+      if(S.biotop==="ja")
         warn("biotop",
-          T("Gesetzlich geschütztes Biotop auf der Fläche: nur in Abstimmung mit der zuständigen unteren Naturschutzbehörde möglich.",
-            "Legally protected biotope on the site: only possible in coordination with the competent lower nature conservation authority."),
-          T("Gesetzlich geschütztes Biotop auf der Fläche.","Legally protected biotope on the site."));
-      if(S.verfuegbar==="nein")
-        warn("verfuegbar",
+          T("Gesetzlich geschütztes Biotop auf der Fläche: bitte mit der zuständigen unteren Naturschutzbehörde abstimmen.",
+            "Legally protected biotope on the site: please agree with the competent lower nature conservation authority."),
+          T("Gesetzlich geschütztes Biotop: mit der UNB abstimmen.","Legally protected biotope: agree with the UNB."));
+      if(S.biotop==="unklar")
+        warn("biotop",
+          T("Ob ein gesetzlich geschütztes Biotop auf der Fläche liegt, ist noch nicht geprüft. Klären Sie das vor einer Anfrage bei der unteren Naturschutzbehörde.",
+            "Whether a legally protected biotope lies on the site has not yet been checked. Clarify this before making an enquiry to the lower nature conservation authority.")+lanis,
+          T("Geschütztes Biotop noch nicht geprüft: vor der Anfrage klären.","Protected biotope not yet checked: clarify before the enquiry."));
+      if(S.verfuegbar==="nein" || S.verfuegbar==="offen")
+        note("verfuegbar",
           T("Ein Flächenwechsel ist bei produktionsintegrierten Maßnahmen möglich, muss aber von vornherein mitbedacht und mit der Behörde geregelt werden.",
             "Production-integrated measures allow a change of site, but this must be considered from the start and agreed with the authority."),
-          T("Verfügbarkeit nicht für die Dauer des Eingriffs gesichert; Flächenwechsel mit der UNB regeln.","Availability not secured for the duration of the intervention; agree a change of site with the UNB."),
-          T("Die Fläche ist voraussichtlich nicht für die gesamte Dauer des Eingriffs verfügbar. Einen späteren Flächenwechsel würden wir gern von vornherein mit Ihnen regeln: Unter welchen Voraussetzungen wäre das für Sie denkbar?",
-            "The site is probably not available for the entire duration of the intervention. We would like to agree a later change of site with you from the outset: under what conditions would that be conceivable for you?"));
-      if(S.verfuegbar==="offen")
-        note("verfuegbar",
-          T("Die langfristige Verfügbarkeit ist noch zu klären. Ein Flächenwechsel ist bei produktionsintegrierten Maßnahmen möglich, sollte aber frühzeitig mit der Behörde besprochen werden.",
-            "Long-term availability still has to be clarified. A change of site is possible for production-integrated measures but should be discussed with the authority early on."),
-          T("Verfügbarkeit noch offen; Flächenwechsel frühzeitig mit der UNB besprechen.","Availability still open; discuss a change of site early with the UNB."),
-          T("Die langfristige Verfügbarkeit der Fläche ist noch in Klärung; die Möglichkeit eines Flächenwechsels würden wir gern frühzeitig mit Ihnen besprechen.",
-            "Long-term availability of the site is still being clarified; we would like to discuss the possibility of a change of site with you early on."));
+          T("Verfügbarkeit nicht gesichert: Flächenwechsel von vornherein mit der UNB regeln.","Availability not secured: agree a change of site with the UNB from the outset."));
       if(S.gapdzv==="nein" || S.gapdzv==="unklar")
-        warn("gapdzv",
-          T("Vorausgesetzt werden die Agroforstdefinition der GAPDZV und die Anforderungen der Öko-Regelung 3. Ohne sie ist die Basisausprägung von 8 Punkten nicht belegt.",
-            "The agroforestry definition of the GAPDZV and the requirements of Eco-Scheme 3 are assumed. Without them the baseline value of 8 points is not substantiated."),
-          T("Anforderungen der Öko-Regelung 3 noch nicht erfüllt oder offen.","Requirements of Eco-Scheme 3 not yet met or still open."));
+        note("gapdzv",
+          T("Vorausgesetzt wird die Agroforstdefinition der GAPDZV. Die Einhaltung der Öko-Regelung 3 ist nicht zwingend erforderlich, für die Kommunikation der Maßnahme mit der unteren Naturschutzbehörde aber meist hilfreich.",
+            "The agroforestry definition of the GAPDZV is assumed. Compliance with Eco-Scheme 3 is not strictly required, but is usually helpful for communicating the measure to the lower nature conservation authority."),
+          T("Öko-Regelung 3 nicht erfüllt oder offen: für die Abstimmung mit der UNB meist hilfreich.","Eco-Scheme 3 not met or open: usually helpful for the consultation with the UNB."));
     }
     if(i===2){
       if(S.eigentum==="dritte")
@@ -614,27 +624,16 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
           T("Der Eigentümer muss der Pflanzung zustimmen und die Sicherung mittragen. Wem die Wertpunkte zustehen, ist vertraglich zu regeln.",
             "The owner must agree to the planting and support the legal securing. To whom the value points belong has to be settled by contract."),
           T("Fläche eines Dritten: Zuordnung der Wertpunkte vertraglich regeln.","Land of a third party: settle the allocation of value points by contract."));
-      if(S.betrieb==="nein")
-        warn("betrieb",
-          T("Anlage, Pflege und Bewirtschaftung müssen übernommen werden. Möglich ist das auch über einen Dienstleister.",
-            "Establishment, care and management must be taken over. A service provider can also do this."),
-          T("Pflege und Bewirtschaftung sind noch nicht übernommen.","Care and management have not yet been taken over."));
-      if(S.kapazitaet==="nein")
-        note("kapazitaet",
-          T("Ohne eigene Kapazität läuft die operative Umsetzung über die Verbandsgemeinde, ein Fachbüro oder einen Agroforst-Dienstleister.",
-            "Without capacity of its own, operational implementation runs through the Verbandsgemeinde (municipal association), a specialist consultancy or an agroforestry service provider."),
-          T("Operative Umsetzung ist extern zu vergeben.","Operational implementation has to be commissioned externally."));
+      if(S.dienstleister==="nein")
+        note("dienstleister",
+          T("Anlage und Pflege müssen übernommen werden. Üblich ist das über spezialisierte Dienstleister; Teile der Pflege und Bewirtschaftung können auch vom bisherigen Bewirtschafter übernommen werden.",
+            "Establishment and care must be taken over. This is usually done through specialised service providers; parts of the care and management can also be taken over by the previous farmer."),
+          T("Anlage und Pflege: Zuständigkeit noch festzulegen.","Establishment and care: responsibility still to be determined."));
       if(S.waerme==="ja" || S.waerme==="offen")
         note("waerme",
-          T("Hackschnitzel aus der Ernte können an ein kommunales Heizwerk oder ein Nahwärmenetz gehen. Allein tragen sie die Anlage nicht, sie ergänzen aber die Finanzierung über Wertpunkte.",
-            "Wood chips from the harvest can go to a municipal heating plant or a local heat network. On their own they do not finance the establishment, but they supplement the financing through value points.")+
-          (S.waerme==="offen" ? T(" Ob es in der Region einen Abnehmer gibt, lohnt sich früh zu klären."," It is worth clarifying early whether a buyer exists in the region.") : ""),
-          S.waerme==="ja" ? T("Wärmenutzung der Hackschnitzel als zusätzlicher Erlös.","Heat use of the wood chips as an additional revenue.")
-                          : T("Abnehmer für Hackschnitzel finden.","Find a buyer for the wood chips."));
-      if(S.waerme==="nein")
-        note("waerme",
-          T("Ohne Wärmenutzung sind die Wertpunkte der einzige Erlös.","Without heat use, the value points are the only revenue."),
-          T("Ohne Wärmenutzung sind die Wertpunkte der einzige Erlös.","Without heat use, the value points are the only revenue."));
+          T("Durch die Nutzung von Hackschnitzeln in der kommunalen Wärmeversorgung können neben den naturschutzfachlichen Zielen auch Klimaschutzziele der Kommune unterstützt werden.",
+            "By using wood chips in the municipal heat supply, the municipality's climate protection goals can be supported in addition to the nature conservation goals."),
+          T("Hackschnitzel in der kommunalen Wärmeversorgung: Beitrag zu Klimaschutzzielen.","Wood chips in the municipal heat supply: contribution to climate protection goals."));
     }
     if(i===3){
       var c = calc();
@@ -644,22 +643,22 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
             "The margin strip is rated at 16 points. It must be established and managed so that structural richness can develop; it is no longer part of the main crop's use."),
           T("Saum ist strukturreich anzulegen.","The margin strip must be established with rich structure."));
       if(c.kernB > 25)
-        warn("masse",
-          T("Der Gehölzstreifen ist ohne Saum breiter als 25 m. Die Öko-Regelung 3 erlaubt höchstens 25 m.","Without the margin strip the woody strip is wider than 25 m. Eco-Scheme 3 allows at most 25 m."),
+        note("masse",
+          T("Der Gehölzstreifen ist ohne Saum breiter als 25 m. Die Öko-Regelung 3 sieht höchstens 25 m vor.","Without the margin strip the woody strip is wider than 25 m. Eco-Scheme 3 provides for at most 25 m."),
           T("Gehölzstreifen breiter als 25 m.","Woody strip wider than 25 m."));
       if(S.eingabe==="flaeche"){
         if(c.n < 2)
-          warn("masse",T("Die Öko-Regelung 3 verlangt mindestens 2 Gehölzstreifen.","Eco-Scheme 3 requires at least 2 woody strips."),
+          note("masse",T("Die Öko-Regelung 3 sieht mindestens 2 Gehölzstreifen vor.","Eco-Scheme 3 provides for at least 2 woody strips."),
                T("Weniger als 2 Gehölzstreifen.","Fewer than 2 woody strips."));
         if(c.anteil!==null && (c.anteil > 0.4 || c.anteil < 0.02))
-          warn("masse",
-            T("Der Gehölzanteil liegt bei "+pc(c.anteil*100)+" der Fläche. Die Öko-Regelung 3 verlangt 2 bis 40 %.",
-              "The woody share is "+pc(c.anteil*100)+" of the area. Eco-Scheme 3 requires 2 to 40%."),
+          note("masse",
+            T("Der Gehölzanteil liegt bei "+pc(c.anteil*100)+" der Fläche. Die Öko-Regelung 3 sieht 2 bis 40 % vor.",
+              "The woody share is "+pc(c.anteil*100)+" of the area. Eco-Scheme 3 provides for 2 to 40%."),
             T("Gehölzanteil außerhalb von 2 bis 40 %.","Woody share outside 2 to 40%."));
         if(c.n>=2 && c.abstand!==null && (c.abstand < 20 || c.abstand > 100))
           note("masse",
-            T("Rechnerisch liegen rund "+num(Math.max(c.abstand,0))+" m zwischen den Streifen. Die Öko-Regelung 3 verlangt 20 bis 100 m. Mit mehr oder weniger Streifen lässt sich das anpassen.",
-              "Calculated, there are about "+num(Math.max(c.abstand,0))+" m between the strips. Eco-Scheme 3 requires 20 to 100 m. You can adjust this with more or fewer strips."),
+            T("Rechnerisch liegen rund "+num(Math.max(c.abstand,0))+" m zwischen den Streifen. Die Öko-Regelung 3 sieht 20 bis 100 m vor. Mit mehr oder weniger Streifen lässt sich das anpassen.",
+              "Calculated, there are about "+num(Math.max(c.abstand,0))+" m between the strips. Eco-Scheme 3 provides for 20 to 100 m. You can adjust this with more or fewer strips."),
             T("Abstand der Streifen außerhalb von 20 bis 100 m.","Strip spacing outside 20 to 100 m."));
       }
       if(c.aw===null)
@@ -702,17 +701,37 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     return r;
   }
 
-  function fertig(i){
-    if(i===0) return S.ziele.length>0;
-    if(i===1) return !!(S.nutzung && ausgangswert()!==null && S.offenland && S.biotop && S.verfuegbar && S.gapdzv);
-    if(i===2) return !!(S.eigentum && S.betrieb && S.kapazitaet && S.waerme);
-    if(i===3) return calc().fGes>0 && calc().aw!==null;
-    return true;
+  /* Fehlende Pflichtangaben je Schritt (Schlüssel = data-need der Frage); das Feld "Lage" ist nie Pflicht */
+  function fehlend(i){
+    var f = [];
+    if(i===0){ if(!S.ziele.length) f.push("ziele"); }
+    if(i===1){
+      if(!S.nutzung) f.push("nutzung");
+      else if(ausgangswert()===null) f.push("wertManuell");
+      ["offenland","biotop","verfuegbar","gapdzv"].forEach(function(k){ if(!S[k]) f.push(k); });
+    }
+    if(i===2) ["eigentum","dienstleister","waerme"].forEach(function(k){ if(!S[k]) f.push(k); });
+    if(i===3){
+      if(S.eingabe==="flaeche"){
+        if(!(zahl(S.schlag)>0)) f.push("schlag");
+        if(!(Math.round(zahl(S.anzahl))>0)) f.push("anzahl");
+      } else if(!(zahl(S.laenge)>0)) f.push("laenge");
+      if(!(zahl(S.breite)>0)) f.push("breite");
+    }
+    return f;
   }
-  function fehltText(i){
-    if(i===1 && S.nutzung && ausgangswert()===null)
-      return T("Bitte einen Ausgangswert zwischen 0 und 24 eintragen","Please enter an initial value between 0 and 24");
-    return T("Bitte alle Fragen dieses Schritts beantworten","Please answer all questions in this step");
+  function fertig(i){ return fehlend(i).length===0; }
+  function markUpdate(){
+    var miss = pruefen ? fehlend(step) : [];
+    var nodes = document.querySelectorAll("#main [data-need]");
+    Array.prototype.forEach.call(nodes, function(n){
+      var k = n.getAttribute("data-need"), on = miss.indexOf(k)>=0;
+      n.classList.toggle("miss", on);
+      var mm = n.querySelector(".missmsg");
+      if(mm) mm.textContent = (k==="wertManuell" && String(S.wertManuell).trim()!=="")
+        ? T("Bitte einen Ausgangswert zwischen 0 und 24 eintragen","Please enter an initial value between 0 and 24")
+        : T("Angabe fehlt","Entry missing");
+    });
   }
 
   /* Rolle: [Bezeichnung, Text, hervorgehoben] */
@@ -731,16 +750,13 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     }[S.eigentum] || "";
     r.push([T("Sicherung","Legal securing"), sich || T("noch offen","still open")]);
     r.push([T("Wertpunkte","Value points"), wp + wpZu, true]);
-    r.push([T("Pflege und Bewirtschaftung","Care and management"),
-      S.betrieb==="ja" ? T("durch den derzeitigen Bewirtschafter","by the current farmer") :
-      (S.betrieb==="nein" ? T("noch offen, möglich auch über einen Dienstleister","still open, a service provider is also possible") : T("noch offen","still open"))]);
-    r.push([T("Projektsteuerung","Project management"),
-      S.kapazitaet==="ja" ? T("durch die Kommune selbst","by the municipality itself") :
-      (S.kapazitaet==="nein" ? T("extern, über Verbandsgemeinde, Fachbüro oder Agroforst-Dienstleister","external, via the Verbandsgemeinde, a specialist consultancy or an agroforestry service provider") : T("noch offen","still open"))]);
+    r.push([T("Planung und Pflege","Planning and care"),
+      S.dienstleister==="ja" ? T("Planung, Pflanzung und Pflege über einen spezialisierten Dienstleister","planning, planting and care through a specialised service provider") :
+      (S.dienstleister==="nein" ? T("durch Kommune oder Bewirtschafter, noch zu klären","by the municipality or farmer, still to be clarified") : T("noch offen","still open"))]);
     r.push([T("Erlöse","Revenue"),
-      S.waerme==="ja" ? T("Wertpunkte, ergänzt um Hackschnitzel für die Wärmenutzung","value points, supplemented by wood chips for heat use") :
-      (S.waerme==="offen" ? T("Wertpunkte; Wärmenutzung der Hackschnitzel wird geprüft","value points; heat use of the wood chips is being examined") :
-       (S.waerme==="nein" ? T("Wertpunkte (einziger Erlös)","value points (only revenue)") : T("Wertpunkte","Value points")))]);
+      S.waerme==="ja" ? T("Wertpunkte, ergänzt um Hackschnitzel für die kommunale Wärmeversorgung","value points, supplemented by wood chips for the municipal heat supply") :
+      (S.waerme==="offen" ? T("Wertpunkte; Hackschnitzel für die kommunale Wärmeversorgung werden geprüft","value points; wood chips for the municipal heat supply are being examined") :
+       (S.waerme==="nein" ? T("Wertpunkte","Value points") : T("Wertpunkte","Value points")))]);
     return r;
   }
 
@@ -767,7 +783,7 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     return n;
   }
   function radios(name, legend, hint, options, current, cols){
-    var h = '<fieldset><legend>'+legend+'</legend>';
+    var h = '<fieldset data-need="'+name+'"><legend>'+legend+'</legend><div class="missmsg"></div>';
     if(hint) h += '<div class="hint">'+hint+'</div>';
     h += '<div class="'+(cols?"grid2":"opts")+'">';
     options.forEach(function(o){
@@ -777,7 +793,7 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     return h + '</div>';
   }
   function boxes(name, legend, hint, options, isOn, cols){
-    var h = '<fieldset><legend>'+legend+'</legend>';
+    var h = '<fieldset data-need="'+(name==="ziele"?"ziele":"")+'"><legend>'+legend+'</legend><div class="missmsg"></div>';
     if(hint) h += '<div class="hint">'+hint+'</div>';
     h += '<div class="'+(cols?"grid2":"opts")+'">';
     options.forEach(function(o){
@@ -828,9 +844,11 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     var of5 = T("Schritt "+(i+1)+" von 5","Step "+(i+1)+" of 5");
     if(i===0){
       h += '<div class="eyebrow">'+of5+'</div><h2>'+T("Vorprüfung einer flächenspezifischen Agroforst-Kompensationsmaßnahme","Pre-check of a site-specific agroforestry compensation measure")+'</h2>';
-      h += '<div class="fields">'+
+      h += '<div class="fields two">'+
            '<label class="f">'+T("Bezeichnung","Name")+' <span class="u">'+T("erscheint auf dem Ergebnisblatt","appears on the result sheet")+'</span>'+
            '<input type="text" id="gemeinde" value="'+esc(S.gemeinde)+'" placeholder="'+esc(T("z. B. Ortsgemeinde Musterbach, Agroforst Am Mühlbach","e.g. Musterbach local municipality, Am Mühlbach agroforestry"))+'"></label>'+
+           '<label class="f soft">'+T("Lage der Fläche","Location of the site")+' <span class="u">'+T("Gemarkung, Flur, Flurstück (ggf. Lage, Schlagnummer), optional, erscheint auf dem Ergebnisblatt","cadastral district, plot, parcel (where applicable location, field number), optional, appears on the result sheet")+'</span>'+
+           '<input type="text" id="lage" value="'+esc(S.lage)+'" placeholder="'+esc(T("z. B. Gemarkung Musterbach, Flur 3, Flurstück 45","e.g. Musterbach cadastral district, plot 3, parcel 45"))+'"></label>'+
            '</div>';
       h += boxes("ziele",T("Ziele der Agroforst-Kompensationsmaßnahme","Goals of the agroforestry compensation measure"),
         T("Mehrfachnennung möglich.","Multiple answers possible."),[
@@ -852,9 +870,9 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
           "Agroforestry systems and production-integrated compensation require agriculturally used land. The initial value in points per m² determines the possible uplift."), opts, S.nutzung, true);
       if(S.nutzung){
         var rw = richtwert();
-        h += '<div class="fields"><label class="f">'+T("Ausgangswert","Initial value")+' <span class="u">'+T("Punkte je m², ","points per m², ")+
+        h += '<div class="fields"><label class="f" data-need="wertManuell">'+T("Ausgangswert","Initial value")+' <span class="u">'+T("Punkte je m², ","points per m², ")+
              (rw!==null ? T("mit dem Richtwert vorbelegt, überschreibbar","preset to the guide value, can be overwritten") : T("bitte eintragen","please enter"))+'</span>'+
-             '<input type="text" inputmode="decimal" id="wertManuell" value="'+esc(S.wertManuell)+'"'+(rw===null?' placeholder="'+T("z. B. 7","e.g. 7")+'"':'')+'></label></div>'+
+             '<input type="text" inputmode="decimal" id="wertManuell" value="'+esc(S.wertManuell)+'"><span class="missmsg"></span></label></div>'+
              '<div class="hint" style="margin-top:7px">'+T("Den Biotopwert der Fläche können Sie in Anlage 7.1 der Biotopwertliste nachschlagen: ","You can look up the biotope value of the site in Annex 7.1 of the biotope value list: ")+
              '<a href="'+LINK_LEITFADEN+'" target="_blank" rel="noopener">'+T("Praxisleitfaden zur Ermittlung des Kompensationsbedarfs in Rheinland-Pfalz","Practical guide to determining the compensation requirement in Rhineland-Palatinate (in German)")+'</a>.</div>';
       }
@@ -869,18 +887,16 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
         [{v:"nein",l:T("nein","no")},{v:"ja",l:T("ja","yes")},{v:"unklar",l:T("nicht geprüft","not checked")}], S.biotop, true);
       h += fq(1,["biotop"]) + '</fieldset>';
 
-      h += radios("verfuegbar",T("Ist die Fläche analog zur Dauer des Eingriffs verfügbar?","Is the site available for as long as the intervention lasts?"), null,
+      h += radios("verfuegbar",T("Ist die Fläche über den gesamten Zeitraum des zu kompensierenden Eingriffs verfügbar?","Is the site available for the entire period of the intervention to be compensated?"), null,
         [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"offen",l:T("noch offen","still open")}], S.verfuegbar, true);
       h += fq(1,["verfuegbar"]) + '</fieldset>';
 
       h += radios("gapdzv",T("Erfüllt das System die Anforderungen der Öko-Regelung 3?","Does the system meet the requirements of Eco-Scheme 3?"),
-        T('Vorausgesetzt werden die Agroforstdefinition nach § 4 Abs. 2 GAPDZV und die Anforderungen der Öko-Regelung 3. '+
-          'So entspricht bereits die Basisausprägung den Qualitätsstandards, die für den Förderanspruch entwickelt wurden. '+
-          'Eckpunkte: mindestens 2 Gehölzstreifen, je höchstens 25 m breit, Gehölzanteil 2 bis 40 % der Fläche, 20 bis 100 m Abstand zwischen den Streifen. '+
+        T('Vorausgesetzt wird die Agroforstdefinition nach § 4 Abs. 2 GAPDZV. Die Anforderungen der Öko-Regelung 3 sind für eine Kompensationsmaßnahme rechtlich nicht vorgeschrieben; ihre Einhaltung ist aber meist hilfreich, weil sie einen anerkannten Qualitätsstandard belegt. '+
+          'Eckpunkte: mindestens 2 Gehölzstreifen, je höchstens 25 m breit, Gehölzanteil 2 bis 40 % der Fläche, 20 bis 100 m Abstand zwischen den Streifen, Holzernte nur in den Monaten Dezember, Januar und Februar. '+
           'Ob neben der Kompensation zusätzlich die Förderung über die Öko-Regelung 3 möglich ist, ist derzeit offen. ',
-          'The agroforestry definition under § 4 (2) GAPDZV (CAP direct payments ordinance) and the requirements of Eco-Scheme 3 are assumed. '+
-          'The baseline value of 8 points therefore already corresponds to the quality standards developed for the subsidy entitlement. '+
-          'Key points: at least 2 woody strips, each at most 25 m wide, woody share 2 to 40% of the area, 20 to 100 m between the strips. '+
+          'The agroforestry definition under § 4 (2) GAPDZV (CAP direct payments ordinance) is assumed. The requirements of Eco-Scheme 3 are not legally prescribed for a compensation measure; compliance is usually helpful, however, because it demonstrates a recognised quality standard. '+
+          'Key points: at least 2 woody strips, each at most 25 m wide, woody share 2 to 40% of the area, 20 to 100 m between the strips, wood harvest only in the months of December, January and February. '+
           'Whether the Eco-Scheme 3 subsidy can be claimed in addition to compensation is currently open. ')+
         '<a href="'+LINK_OER3+'" target="_blank" rel="noopener">'+T("Mehr zur Öko-Regelung 3","More on Eco-Scheme 3 (in German)")+'</a>',
         [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"unklar",l:T("noch offen","still open")}], S.gapdzv, true);
@@ -893,13 +909,10 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
         [{v:"betrieb",l:T("dem landwirtschaftlichen Betrieb","the farm")},{v:"kommune",l:T("der Kommune (Verpächterin)","the municipality (as lessor)")},{v:"dritte",l:T("einem Dritten","a third party")}],
         S.eigentum, true);
       h += fq(2,["eigentum"]) + '</fieldset>';
-      h += radios("betrieb",T("Übernimmt der aktuelle Bewirtschafter der Fläche Pflege und Bewirtschaftung der Maßnahme?","Will the current farmer of the site take over care and management of the measure?"),
-        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")}], S.betrieb, true);
-      h += fq(2,["betrieb"]) + '</fieldset>';
-      h += radios("kapazitaet",T("Hat die Kommune Kapazität, sich um die operative Projektumsetzung zu kümmern?","Does the municipality have the capacity to handle operational project implementation?"),
-        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")}], S.kapazitaet, true);
-      h += fq(2,["kapazitaet"]) + '</fieldset>';
-      h += radios("waerme",T("Wäre es in der Region interessant, Hackschnitzel für die Wärmenutzung einzubringen?","Would it be of interest in the region to supply wood chips for heat use?"),
+      h += radios("dienstleister",T("Soll die Planung der Pflanzung, Fertigstellungs- und Etablierungspflege der Maßnahme an einen spezialisierten Dienstleister vergeben werden?","Is the planning of the planting, completion care and establishment care of the measure to be awarded to a specialised service provider?"),
+        null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")}], S.dienstleister, true);
+      h += fq(2,["dienstleister"]) + '</fieldset>';
+      h += radios("waerme",T("Ist im Rahmen der kommunalen Wärmeplanung die Erzeugung von Holzhackschnitzeln interessant?","Is the production of wood chips of interest within the framework of municipal heat planning?"),
         null, [{v:"ja",l:T("ja","yes")},{v:"nein",l:T("nein","no")},{v:"offen",l:T("noch offen","still open")}], S.waerme, true);
       h += fq(2,["waerme"]) + '</fieldset>';
     }
@@ -932,16 +945,16 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
            '</div></fieldset>';
       h += '<div class="fields">';
       if(S.eingabe==="flaeche"){
-        h += '<label class="f">'+T("Größe des Schlags","Field size")+' <span class="u">ha</span>'+
-               '<input type="text" inputmode="decimal" id="schlag" value="'+esc(S.schlag)+'"></label>'+
-             '<label class="f">'+T("Anzahl der Gehölzstreifen","Number of woody strips")+' <span class="u">'+T("Stück","count")+'</span>'+
-               '<input type="text" inputmode="numeric" id="anzahl" value="'+esc(S.anzahl)+'"></label>';
+        h += '<label class="f" data-need="schlag">'+T("Größe des Schlags","Field size")+' <span class="u">ha</span>'+
+               '<input type="text" inputmode="decimal" id="schlag" value="'+esc(S.schlag)+'"><span class="missmsg"></span></label>'+
+             '<label class="f" data-need="anzahl">'+T("Anzahl der Gehölzstreifen","Number of woody strips")+' <span class="u">'+T("Stück","count")+'</span>'+
+               '<input type="text" inputmode="numeric" id="anzahl" value="'+esc(S.anzahl)+'"><span class="missmsg"></span></label>';
       } else {
-        h += '<label class="f">'+T("Länge der Gehölzstreifen","Length of the woody strips")+' <span class="u">'+T("m, alle Streifen zusammen","m, all strips together")+'</span>'+
-               '<input type="text" inputmode="decimal" id="laenge" value="'+esc(S.laenge)+'"></label>';
+        h += '<label class="f" data-need="laenge">'+T("Länge der Gehölzstreifen","Length of the woody strips")+' <span class="u">'+T("m, alle Streifen zusammen","m, all strips together")+'</span>'+
+               '<input type="text" inputmode="decimal" id="laenge" value="'+esc(S.laenge)+'"><span class="missmsg"></span></label>';
       }
-      h += '<label class="f">'+T("Breite der Gehölzstreifen","Width of the woody strips")+' <span class="u">'+T("m je Streifen, inklusive Saum","m per strip, including margin strip")+'</span>'+
-          '<input type="text" inputmode="decimal" id="breite" value="'+esc(S.breite)+'"></label>'+
+      h += '<label class="f" data-need="breite">'+T("Breite der Gehölzstreifen","Width of the woody strips")+' <span class="u">'+T("m je Streifen, inklusive Saum","m per strip, including margin strip")+'</span>'+
+          '<input type="text" inputmode="decimal" id="breite" value="'+esc(S.breite)+'"><span class="missmsg"></span></label>'+
         '<label class="f">'+T("Saumbreite je Seite","Margin strip width per side")+' <span class="u">m</span><select id="saum">'+
           SAUM_OPT.map(function(b){
             var raus = (b>0 && 2*b >= zahl(S.breite));
@@ -1059,10 +1072,10 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
   function flaechenText(c){
     return T(nf2.format(c.ha)+" ha Gehölzfläche"+(S.gapdzv==="ja" ? " entsprechend den Anforderungen der Öko-Regelung 3" : "")+
            ", davon Gehölzkern "+num(c.fKern)+" m² und Saum "+num(c.fSaum)+" m²"+
-           (S.gapdzv!=="ja" ? " (Anforderungen der Öko-Regelung 3 noch offen)" : ""),
+           (S.gapdzv!=="ja" ? " (Öko-Regelung 3 nicht erfüllt oder noch offen)" : ""),
            nf2.format(c.ha)+" ha woody area"+(S.gapdzv==="ja" ? " meeting the requirements of Eco-Scheme 3" : "")+
            ", of which woody core "+num(c.fKern)+" m² and margin strip "+num(c.fSaum)+" m²"+
-           (S.gapdzv!=="ja" ? " (requirements of Eco-Scheme 3 still open)" : ""));
+           (S.gapdzv!=="ja" ? " (Eco-Scheme 3 not met or still open)" : ""));
   }
 
   function mailFragen(c){
@@ -1094,7 +1107,7 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
            "we are examining"+(S.gemeinde?" for "+S.gemeinde:"")+" whether an agroforestry system can be established as a production-integrated compensation measure, and would like to discuss the project with you early and without obligation.\n\n");
     t += T("Vorhaben\n","Project\n");
     t += "- "+nutz+", "+flaechenText(c)+"\n";
-    t += "- "+eig+T("; Pflege ","; care ")+(S.betrieb==="ja"?T("durch den derzeitigen Bewirtschafter","by the current farmer"):T("noch nicht geklärt","not yet clarified"))+"\n";
+    t += "- "+eig+"\n";
     if(S.waerme==="ja") t += T("- Hackschnitzel sollen in die Wärmenutzung gehen\n","- Wood chips are to go into heat use\n");
     t += "\n";
     if(wa.length){ t += T("Geplante Ausgestaltung\n","Planned design\n")+"- "+wa.join("\n- ")+"\n\n"; }
@@ -1528,11 +1541,18 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     }
     if(step<5){
       var next = el("button",{class:"btn",type:"button"}, step===4 ? T("Ergebnisblatt","Result sheet") : T("Weiter","Next"));
-      next.disabled = !fertig(step);
-      next.addEventListener("click", function(){ go(step+1); });
+      next.addEventListener("click", function(){
+        if(fehlend(step).length){
+          pruefen = true; markUpdate(); navState();
+          var first = document.querySelector("#main .miss");
+          if(first) first.scrollIntoView({behavior:"smooth", block:"center"});
+          return;
+        }
+        go(step+1);
+      });
       nav.appendChild(next);
       nav.appendChild(el("span",{class:"spacer"}));
-      nav.appendChild(el("span",{class:"counter", id:"fehlt"}, fertig(step) ? "" : fehltText(step)));
+      nav.appendChild(el("span",{class:"counter", id:"fehlt"}, ""));
     } else {
       var dl = el("button",{class:"btn pdfbtn",type:"button"},T("Ergebnisblatt als PDF herunterladen","Download result sheet as PDF"));
       nav.appendChild(dl);
@@ -1543,18 +1563,18 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
     }
     main.appendChild(nav);
     bind();
+    markUpdate(); navState();
   }
 
   function go(i){
-    step = i; maxReached = Math.max(maxReached, i); render();
+    step = i; pruefen = false; maxReached = Math.max(maxReached, i); render();
     window.scrollTo({top:0, behavior:"smooth"});
   }
 
   function navState(){
-    var nextBtn = document.querySelector("#main .nav .btn:not(.ghost)");
-    if(nextBtn && step<5) nextBtn.disabled = !fertig(step);
+    markUpdate();
     var f = document.getElementById("fehlt");
-    if(f) f.textContent = fertig(step) ? "" : fehltText(step);
+    if(f) f.textContent = (pruefen && !fertig(step)) ? T("Bitte die markierten Angaben ergänzen","Please complete the marked entries") : "";
   }
 
   function refresh(){
@@ -1638,6 +1658,8 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
 
     var g = document.getElementById("gemeinde");
     if(g) g.addEventListener("input", function(){ S.gemeinde = g.value; });
+    var lg = document.getElementById("lage");
+    if(lg) lg.addEventListener("input", function(){ S.lage = lg.value; });
     var nz = document.getElementById("notiz");
     if(nz) nz.addEventListener("input", function(){ S.notiz = nz.value; });
 
