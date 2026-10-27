@@ -891,7 +891,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     return f;
   }
   function fertig(i){ return fehlend(i).length===0; }
-  /* freiwillige Fragen, die leer markiert werden und im Ergebnis als "Ohne Angabe" erscheinen */
+  /* freiwillige Fragen: leer lösen sie den Hinweistext neben "Weiter" und die Zeile "Ohne Angabe" aus (keine rote Markierung) */
   var FREIWILLIG_LEER = {offenland:1, biotop:1, verfuegbar:1, gapdzv:1};
   function freiwilligLeer(i){
     var f = [];
@@ -905,7 +905,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
             verfuegbar:T("Verfügbarkeit","Availability"), gapdzv:T("Öko-Regelung 3","Eco-Scheme 3"), eigentum:T("Eigentum","Ownership")}[k];
   }
   function markUpdate(){
-    var miss = (pruefen ? fehlend(step) : []).concat(step<5 ? freiwilligLeer(step) : []);
+    var miss = pruefen ? fehlend(step) : [];
     var nodes = document.querySelectorAll("#main [data-need]");
     Array.prototype.forEach.call(nodes, function(n){
       var k = n.getAttribute("data-need"), on = miss.indexOf(k)>=0;
