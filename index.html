@@ -122,6 +122,9 @@ label.f .u{font-weight:400;color:var(--ink-3)}
 input[type=number],input[type=text],select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);
   border-radius:5px;background:var(--surface);color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
 textarea{min-height:84px;resize:vertical;line-height:1.45}
+/* Time-Lag-Auswahl: eigene Zeile, damit der Optionstext nicht abgeschnitten wird */
+label.f.full{grid-column:1/-1}
+label.f.full select{max-width:340px}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
 
 .section-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
@@ -129,7 +132,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 
 .rtable{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px;font-variant-numeric:tabular-nums}
 .rtable th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
-  padding:0 8px 6px 0;border-bottom:1px solid var(--line)}
+  padding:0 8px 6px 0;border-bottom:1px solid var(--line);white-space:nowrap}
 .rtable td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
 .rtable td.n{text-align:right;color:var(--ink);font-weight:650;white-space:nowrap}
 .rtable tr.sum td{border-top:1px solid var(--ink);border-bottom:0;color:var(--ink);font-weight:700;padding-top:9px}
@@ -266,7 +269,7 @@ h1,h2,legend,.opt span,.flag .ftxt,.kv dd,.kv dt,.hint,.intro,ul.plain li span,.
   table.rtable.stack td:first-child{font-weight:700;color:var(--ink)}
   table.rtable.stack td:first-child::before{content:""}
   table.rtable.stack td.e{display:none}
-  .rtable td.n{white-space:normal}
+  table.rtable.stack td.n{white-space:normal}
   .nav .btn{flex:1 1 100%}
   .kpi .v{font-size:22px}
 }
@@ -1154,7 +1157,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
                    (b===0 ? T("kein anrechenbarer Saum","no creditable fringe") : m(b))+'</option>';
           }).join("")+
         '</select></label>'+
-        '<label class="f">'+T("Entwicklungsdauer bis zum Zielzustand (Time-Lag-Faktor)","Time to reach the target state (time-lag factor)")+'<select id="timeLag">'+
+        '<label class="f full">'+T("Entwicklungsdauer bis zum Zielzustand (Time-Lag-Faktor)","Time to reach the target state (time-lag factor)")+'<select id="timeLag">'+
           [[1,T("1,0 · unter 5 Jahre","1.0 · under 5 years")],[1.2,T("1,2 · 5 bis 10 Jahre","1.2 · 5 to 10 years")],[1.5,T("1,5 · 10 bis 30 Jahre","1.5 · 10 to 30 years")],[2,T("2,0 · über 30 Jahre","2.0 · more than 30 years")]]
           .map(function(o){ return '<option value="'+o[0]+'"'+(timeLag()===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")+
         '</select></label>'+
