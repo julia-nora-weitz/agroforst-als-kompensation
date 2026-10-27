@@ -592,7 +592,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     {n:1, t:["Vorhaben entwickeln","Develop the project"], w:["Kommune und Bewirtschafter","Municipality and farmer"], c:"w-a", x:["Ziel, Fläche und Agroforsttyp klären","Clarify goal, site and type of agroforestry system"], here:true},
     {n:2, t:["Vorabstimmung mit UNB","Pre-consultation with the UNB"], w:["Kommune und Bewirtschafter","Municipality and farmer"], c:"w-a", x:["Ortstermin vor der Planung, noch unverbindlich","Site visit before planning, still non-binding"], here:true},
     {n:3, t:["Pflanzplan und Bewertung","Planting plan and assessment"], w:["Fachbüro","Specialist consultancy"], c:"w-b", x:["unter anderem Ausgangszustand kartieren","among other things, map the initial condition"]},
-    {n:4, t:["Rechtlich sichern","Secure legally"], w:["Kommune oder Bewirtschafter","Municipality or farmer"], c:"w-a", x:["Dauerhaft wirkt nur eine Dienstbarkeit im Grundbuch","Only an easement entered in the land register is permanent"]},
+    {n:4, t:["Rechtlich sichern","Secure legally"], w:["Kommune oder Bewirtschafter","Municipality or farmer"], c:"w-a", x:["Vorgesehen ist eine dingliche Sicherung, z. B. über eine Dienstbarkeit","A security in rem is intended, e.g. through an easement"]},
     {n:5, t:["Anerkennung und Eintrag","Recognition and registration"], w:["Untere Naturschutzbehörde","Lower nature conservation authority"], c:"w-c", x:["Ökokonto im Vorgriff oder Auflage im Zulassungsbescheid","Eco-account in advance, or condition in the permit decision"]},
     {n:6, t:["Pflanzung und Pflege","Planting and care"], w:["Spezialisierter Dienstleister","Specialist service provider"], c:"w-d", x:["Jahr 0 bis 2, der arbeitsintensivste Abschnitt","Years 0 to 2, the most labour-intensive phase"]},
     {n:7, t:["Entwicklungsnachweis","Proof of development"], w:["Maßnahmenträger an die Behörde","Responsible body to the authority"], c:"w-d", x:["nach 3 und 5 Jahren, Ausfälle nachpflanzen","after 3 and 5 years, replant losses"]},
@@ -1471,9 +1471,9 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     Z.s4 = s4;
 
     var s5 = [];
-    if(S.eigentum==="kommune") s5.push({p:T("Maßnahmenträger und Sicherung: die Kommune, vorgesehen über eine Dienstbarkeit im Grundbuch.","Responsible body and legal securing: the municipality, intended through an easement entered in the land register.")});
-    if(S.eigentum==="betrieb") s5.push({p:T("Maßnahmenträger und Sicherung: der bewirtschaftende Betrieb, vorgesehen über eine Dienstbarkeit im Grundbuch.","Responsible body and legal securing: the farm managing the land, intended through an easement entered in the land register.")});
-    if(S.eigentum==="dritte") s5.push({p:T("Die rechtliche Sicherung erfolgt mit Zustimmung des Eigentümers, vorgesehen über eine Dienstbarkeit im Grundbuch.","The legal securing takes place with the owner's consent, intended through an easement entered in the land register.")});
+    if(S.eigentum==="kommune") s5.push({p:T("Maßnahmenträger und Sicherung: die Kommune; vorgesehen ist eine dingliche Sicherung, z. B. über eine Dienstbarkeit im Grundbuch.","Responsible body and legal securing: the municipality; a security in rem is intended, e.g. through an easement entered in the land register.")});
+    if(S.eigentum==="betrieb") s5.push({p:T("Maßnahmenträger und Sicherung: der bewirtschaftende Betrieb; vorgesehen ist eine dingliche Sicherung, z. B. über eine Dienstbarkeit im Grundbuch.","Responsible body and legal securing: the farm managing the land; a security in rem is intended, e.g. through an easement entered in the land register.")});
+    if(S.eigentum==="dritte") s5.push({p:T("Die rechtliche Sicherung erfolgt mit Zustimmung des Eigentümers; vorgesehen ist eine dingliche Sicherung, z. B. über eine Dienstbarkeit im Grundbuch.","The legal securing takes place with the owner's consent; a security in rem is intended, e.g. through an easement entered in the land register.")});
     if(S.dienstleister==="ja") s5.push({p:T("Planung, Pflanzung, Fertigstellungs- und Etablierungspflege übernimmt ein spezialisierter Dienstleister.","Planning, planting, completion care and establishment care are carried out by a specialised service provider.")});
     Z.s5 = s5;
 
