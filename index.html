@@ -338,8 +338,134 @@ a.btn.small{font-size:12.5px;padding:7px 13px}
   .wrap.compact .brandline{font-size:11px}
   .wrap.compact .top-r{flex-direction:row;align-items:center;gap:14px}
 }
+
+/* Korrekturrunde: Schrift größer ab 781 px (A-1); Handy unverändert */
+@media (min-width:781px){
+  body{font-size:16px}
+  .brandline{font-size:12.5px}
+  .standnote{font-size:12.5px}
+  .lede{font-size:14.5px}
+  .scope{font-size:14px}
+  .jump{font-size:13.5px}
+  .seg label{font-size:14.5px}
+  .railitem{font-size:14.5px}
+  .railitem .b{font-size:12.5px}
+  .eyebrow{font-size:12.5px}
+  .intro{font-size:15px}
+  legend{font-size:16px}
+  .hint{font-size:13.5px}
+  .opt{font-size:15px}
+  .opt .sub{font-size:13px}
+  .flag{font-size:14.5px}
+  label.f{font-size:13.5px}
+  input[type=number],input[type=text],select,textarea{font-size:15.5px}
+  .section-head{font-size:12.5px}
+  .rtable{font-size:15px}
+  .rtable th{font-size:12.5px}
+  .rtable caption{font-size:12.5px}
+  .chip{font-size:14px}
+  .flowhead .k{font-size:12.5px}
+  .flowhead .v{font-size:14.5px}
+  .card h4{font-size:15px}
+  .card .who{font-size:12.5px}
+  .card .txt{font-size:13px}
+  .card.here::after{font-size:12.5px}
+  .flownote{font-size:13px}
+  .erloes{font-size:14px}
+  ul.plain li{font-size:14.5px}
+  button.btn{font-size:15.5px}
+  button.btn.small{font-size:14px}
+  .counter{font-size:13.5px}
+  .kv{font-size:15px}
+  .kv dt{font-size:13.5px}
+  .sheetfoot{font-size:12.5px}
+  .mailtext{font-size:14px}
+  footer.pagefoot{font-size:13px}
+  .sheetmeta{font-size:12.5px}
+  .kpi .k{font-size:12.5px}
+  .kpi .s{font-size:13px}
+  .langsw button{font-size:14.5px}
+  .verweise summary,.verweise .vlink{font-size:14.5px}
+  .verweise .vbody{font-size:14.5px}
+  .costbox{font-size:14px}
+  .costbox b{font-size:14px}
+  .missmsg{font-size:13.5px}
+  .dlcard h4{font-size:15.5px}
+  .dlcard p{font-size:14px}
+  .dlkenn{font-size:12.5px}
+  a.btn{font-size:15.5px}
+  a.btn.small{font-size:14px}
+}
+@media (min-width:900px){
+  .brandline{font-size:13.5px}
+  .standnote{font-size:13.5px}
+  .intro-grid .lede{font-size:15.5px}
+  .intro-grid .scope{font-size:14.5px}
+  .wrap.compact .brandline{font-size:12.5px}
+}
+
+/* Korrekturrunde: Gestaltung (A-2, A-3/B-8, A-14, B-4) */
+:root{--band:#1F6B4F; --band-ink:#FFFFFF; --band-ink-2:rgba(255,255,255,.86); --band-soft:rgba(255,255,255,.12); --lime:#B5D96B; --lime-ink:#1C3A2B; --flowbg:#E8EFEA}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--band:#17543E; --flowbg:#1F2823} }
+:root[data-theme="dark"]{--band:#17543E; --flowbg:#1F2823}
+.wrap{padding-top:0}
+.band{background:var(--band);color:var(--band-ink);box-shadow:0 0 0 100vmax var(--band);clip-path:inset(0 -100vmax);padding:22px 0 18px;margin-bottom:6px}
+.band header.top{border-bottom:0;margin-bottom:0}
+.band .brandline{color:var(--band-ink-2)}
+.band h1,.band h1 .tsub{color:var(--band-ink)}
+.band .lede{color:var(--band-ink-2)}
+.band .standnote,.band .standnote a{color:var(--band-ink-2)}
+.band .langsw{border-color:rgba(255,255,255,.7);background:transparent}
+.band .langsw button{color:var(--band-ink)}
+.band .langsw button[aria-pressed="true"]{background:var(--band-ink);color:var(--band)}
+.band .langsw button:focus-visible,.band summary:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.band .bar{background:rgba(255,255,255,.18);margin:18px 0 0}
+.band .bar i{background:var(--lime)}
+h1{hyphens:auto;-webkit-hyphens:auto}
+/* A-2: Verweise als ruhige Textknöpfe, Inhalt klappt inline auf */
+.verweise{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:14px}
+.verweise details{position:static;min-width:0}
+.verweise details[open]{flex-basis:100%}
+.verweise summary{list-style:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--band-ink);
+  background:var(--band-soft);border-radius:99px;padding:6px 14px;text-decoration:none}
+.verweise summary::-webkit-details-marker{display:none}
+.verweise summary::before,.verweise details[open] summary::before{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+.verweise details[open] summary::before{transform:rotate(45deg) translate(-1px,-1px)}
+.verweise summary:hover{background:rgba(255,255,255,.2)}
+.verweise details[open]>.vbody,.verweise .vbody{position:static;width:auto;box-shadow:none;border:0;margin-top:10px;padding:14px 18px;border-radius:10px;
+  background:var(--band-soft);color:var(--band-ink);font-size:inherit;line-height:1.5;max-width:70ch}
+.verweise .vbody b{color:var(--band-ink)}
+.verweise .vnote{margin-top:10px}
+.verweise .vnote a{color:var(--band-ink)}
+/* B-8: aktiver Schritt in Lindgrün, Download-Karten mit grünem Rahmen */
+.railitem[aria-current="true"] .b,.railitem[data-seen="1"][aria-current="true"] .b{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
+.dlcard{border-color:var(--accent)}
+/* A-14: Ablaufgrafik als ruhiges Bild */
+.flowwrap{background:var(--flowbg);border-radius:12px;padding:14px 16px 18px}
+.flowwrap .flowhead:first-child{margin-top:2px}
+.flowwrap .card,.flowwrap .card.here{border:0;box-shadow:none;cursor:default}
+.flowwrap .erloes{background:transparent;border-color:rgba(0,0,0,.15)}
+.flowwrap .card.here{padding-bottom:22px}
+.flowwrap .card h4,.flowwrap .card .who{overflow-wrap:normal;hyphens:auto;-webkit-hyphens:auto}
+@media (min-width:781px){ .flowwrap .card h4{font-size:14px} .flowwrap .card .who{font-size:11.5px} .flowwrap .card .txt{font-size:12.5px} }
+/* B-4: Titel am Handy kleiner und zweizeilig */
+@media (max-width:560px){
+  .wrap:not(.compact) h1{font-size:22px}
+  .wrap:not(.compact) h1 .tsep{display:none}
+  .wrap:not(.compact) h1 .tsub{display:block}
+}
+@media (min-width:781px){ .verweise .vbody{font-size:16px} }
+@media (min-width:900px){
+  .band{padding:34px 0 22px}
+  .wrap.compact .band{padding:18px 0 14px}
+  .band header.top{padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.18);margin-bottom:16px}
+  .wrap.compact .band header.top{border-bottom:0;padding-bottom:4px;margin-bottom:0}
+}
+.wrap.compact .band{padding-top:14px;padding-bottom:12px}
 </style>
 <div class="wrap">
+  <div class="band no-print">
   <header class="top no-print">
     <div>
       <div class="brandline" id="brandline"></div>
@@ -358,6 +484,7 @@ a.btn.small{font-size:12.5px;padding:7px 13px}
     <div class="verweise" id="verweise"></div>
   </div>
   <div class="bar no-print"><i id="progress" style="width:0%"></i></div>
+  </div>
 
   <div class="shell">
     <nav class="rail no-print" id="rail"></nav>
