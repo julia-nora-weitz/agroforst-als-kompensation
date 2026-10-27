@@ -726,8 +726,8 @@ h1{hyphens:auto;-webkit-hyphens:auto}
       var lanis = T("Klären Sie das vor einer Anfrage bei der unteren Naturschutzbehörde, z. B. im Landschaftsinformationssystem der Naturschutzverwaltung Rheinland-Pfalz (LANIS).","Clarify this before making an enquiry to the lower nature conservation authority, for example in the landscape information system of the nature conservation administration of Rhineland-Palatinate (LANIS).");
       if(S.nutzung==="gruenHoch")
         note("H-7","nutzung",
-          T("Auf artenreichem Grünland liegt der Ausgangswert bereits nahe am erreichbaren Zielwert. Tragen Sie möglichst den kartierten Wert ein. Die Bilanz trägt dort meist nur über den Saum oder über eine zusätzliche Aufwertung der Hauptkultur.",
-            "On species-rich grassland the initial value is already close to the achievable target value. Enter the mapped value if possible. The balance there is usually positive only through the margin strip or through an additional uplift of the main crop."),
+          T("Auf artenreichem Grünland liegt der Ausgangswert bereits nahe am erreichbaren Zielwert. Tragen Sie möglichst den kartierten Wert ein. Die Bilanz trägt dort meist nur über den Saum oder über eine zusätzliche Aufwertung der Kulturfläche.",
+            "On species-rich grassland the initial value is already close to the achievable target value. Enter the mapped value if possible. The balance there is usually positive only through the margin strip or through an additional uplift of the cultivated alley."),
           T("Artenreiches Grünland: Ausgangswert nahe am Zielwert.","Species-rich grassland: initial value close to the target value."),
           {gruppe:"flaeche", stichwort:T("Artenreiches Grünland.","Species-rich grassland."),
            lang:T("Der Ausgangswert liegt nahe am erreichbaren Zielwert; die Bilanz trägt meist nur über den Saum oder über eine zusätzliche Aufwertung der Kulturfläche. Tragen Sie möglichst den kartierten Wert ein.",
@@ -795,8 +795,8 @@ h1{hyphens:auto;-webkit-hyphens:auto}
       var masse = {gruppe:"flaeche", stichwort:T("Maße und Öko-Regelung 3.","Dimensions and Eco-Scheme 3.")};
       if(S.saum>0)
         note("H-21","saum",
-          T("Der Saum wird mit 16 Punkten angesetzt. Er muss so angelegt und gepflegt werden, dass sich Strukturreichtum einstellen kann; der Nutzung der Hauptkultur unterliegt er nicht mehr.",
-            "The margin strip is rated at 16 points. It must be established and managed so that structural richness can develop; it is no longer part of the main crop's use."),
+          T("Der Saum wird mit 16 Punkten angesetzt. Er muss so angelegt und gepflegt werden, dass sich Strukturreichtum einstellen kann; der Nutzung der Kulturfläche unterliegt er nicht mehr.",
+            "The margin strip is rated at 16 points. It must be established and managed so that structural richness can develop; it is no longer part of the cultivated alley's use."),
           T("Saum ist strukturreich anzulegen.","The margin strip must be established with rich structure."));
       if(c.kernB > 25)
         note("H-12","masse",
@@ -823,8 +823,8 @@ h1{hyphens:auto;-webkit-hyphens:auto}
           T("Ausgangswert fehlt.","Initial value missing."));
       else if(c.punkte <= 0)
         warn("H-6","rechnung",
-          T("Keine Aufwertung: Die Bilanz ist negativ, das Vorhaben wäre ein Eingriff und keine Kompensationsmaßnahme. Tragen kann es nur über eine zusätzliche Aufwertung der Hauptkultur, etwa eine Grünlandaufwertung mit Bewirtschaftungsauflagen; sie ist hier nicht mitgerechnet.",
-            "No uplift: the balance is negative; the project would be an intervention, not a compensation measure. It could only be viable through an additional uplift of the main crop, for example grassland enhancement with management conditions; this is not included in the calculation."),
+          T("Keine Aufwertung: Die Bilanz ist negativ, das Vorhaben wäre ein Eingriff und keine Kompensationsmaßnahme. Tragen kann es nur über eine zusätzliche Aufwertung der Kulturfläche, etwa eine Grünlandaufwertung mit Bewirtschaftungsauflagen; sie ist hier nicht mitgerechnet.",
+            "No uplift: the balance is negative; the project would be an intervention, not a compensation measure. It could only be viable through an additional uplift of the cultivated alley, for example grassland enhancement with management conditions; this is not included in the calculation."),
           T("Keine Aufwertung durch die Gehölze allein: Ohne zusätzliche Aufwertung der Kulturfläche wäre das Vorhaben ein Eingriff, keine Kompensationsmaßnahme.",
             "No uplift through the woody plants alone: without an additional uplift of the crop area the project would be an intervention, not a compensation measure."));
       else if(c.upKern < 0)
@@ -938,7 +938,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     if(S.a2==="mittel") a.push(T("Ernteintervall ab 10 Jahren: Ernteintervall von mindestens 10 Jahren auf mindestens 20 % der Gehölzfläche","Harvest interval from 10 years: harvest interval of at least 10 years on at least 20% of the woody area"));
     if(S.a2==="alt")    a.push(T("Überhälter: Überhälter auf mindestens 10 % der Individuen, unabhängig von der Baumart mit 50 Jahren Standzeit","Standard trees (Überhälter): standard trees on at least 10% of individuals, regardless of tree species, with 50 years standing time"));
     if(S.gewaesser)     a.push(T("Gewässerbegleitend: Verlauf über mindestens 80 % der Uferlinie, im Abstand von höchstens 5 m landseitig der Böschungsoberkante","Along a watercourse: course along at least 80% of the bank line, at a distance of at most 5 m on the land side of the top of the bank"));
-    if(S.saum>0)        a.push(T("Saum: " + m(S.saum) + " je Seite, nicht in der Nutzung der Hauptkultur, struktur- und artenreich; nach der Etablierung Bodenruhe, Pflege im Rahmen extensiver Bewirtschaftung möglich","Margin strip: " + m(S.saum) + " per side, outside the use of the main crop, rich in structure and species; after establishment no soil disturbance, care within extensive management possible"));
+    if(S.saum>0)        a.push(T("Saum: " + m(S.saum) + " je Seite, nicht in der Nutzung der Kulturfläche, struktur- und artenreich; nach der Etablierung Bodenruhe, Pflege im Rahmen extensiver Bewirtschaftung möglich","Margin strip: " + m(S.saum) + " per side, outside the use of the cultivated alley, rich in structure and species; after establishment no soil disturbance, care within extensive management possible"));
     return a;
   }
 
@@ -1447,7 +1447,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
       T("Alte Bäume mit Höhlen gelten als Schlüsselstrukturen, etwa für holzbewohnende Käfer.","Old trees with cavities are considered key structures, for example for wood-dwelling beetles.")]);
     if(S.gewaesser) mk.push([T("Gewässerbegleitend, +1","Along a watercourse, +1"), T("über mindestens 80 % der Uferlinie, im Abstand von höchstens 5 m landseitig der Böschungsoberkante","along at least 80% of the bank line, at a distance of at most 5 m on the land side of the top of the bank"),
       T("Gehölzbestandene Uferstreifen halten Nährstoffe und Sediment zurück, beschatten das Gewässer und verbinden Lebensräume.","Wooded bank strips retain nutrients and sediment, shade the watercourse and connect habitats.")]);
-    if(c.b>0) mk.push([T("Saum, 16 Punkte","Margin strip, 16 points"), T(nfm.format(c.b)+" m je Seite, nicht in der Nutzung der Hauptkultur, struktur- und artenreich; spontane Begründung zulässig, Pflege bleibt möglich",nfm.format(c.b)+" m per side, outside the use of the main crop, rich in structure and species; spontaneous vegetation permitted, care remains possible"),
+    if(c.b>0) mk.push([T("Saum, 16 Punkte","Margin strip, 16 points"), T(nfm.format(c.b)+" m je Seite, nicht in der Nutzung der Kulturfläche, struktur- und artenreich; spontane Begründung zulässig, Pflege bleibt möglich",nfm.format(c.b)+" m per side, outside the use of the cultivated alley, rich in structure and species; spontaneous vegetation permitted, care remains possible"),
       T("Im krautigen Unterwuchs von Gehölzstreifen sind viele wirbellose Arten häufiger als auf der Anbaufläche; der Saum ist Lebensraum und Übergang zugleich.","In the herbaceous undergrowth of woody strips many invertebrate species are more frequent than on the cultivated area; the margin strip is habitat and transition at once.")]);
     s3.push({tab:{head:[T("Merkmal","Feature"),T("Vorgesehene Festlegung im Pflanzplan","Intended provision in the planting plan"),T("Was es für Natur und Landschaft bringt","What it brings for nature and landscape")], rows:mk, w:[36,58,80], al:["l","l","l"]}});
     s3.push({p:T("Für die gesamte Maßnahme gelten: Mindeststandzeit 20 Jahre und Fortbestand für die Dauer des Eingriffs; keine Düngung der Gehölzfläche; Pflanzenschutzmittel höchstens im ersten Standjahr.","The following apply to the entire measure: minimum standing time 20 years and continuity for the duration of the intervention; no fertilisation of the woody area; plant protection products at most in the first year after planting.")});
