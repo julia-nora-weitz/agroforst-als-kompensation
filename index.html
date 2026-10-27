@@ -306,7 +306,9 @@ label.f.miss input{border-color:var(--warn);outline:2px solid var(--warn-line)}
 .dlcard p{margin:0;font-size:12.5px;color:var(--ink-2);flex:1}
 .dlkenn{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
 .dlkenn.intern{color:var(--warn)}
-.dlcard .btn,.dlcard a.btn{align-self:flex-start;margin-top:6px}
+.dlcard .btn,.dlcard a.btn{align-self:flex-start}
+.dlcard .dlbtn{margin-top:auto;padding-top:6px}
+.dlstate{margin:-8px 0 16px;min-height:1.4em}
 a.btn{display:inline-block;text-decoration:none;font:inherit;font-size:14px;font-weight:650;padding:10px 20px;border-radius:5px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
 a.btn.small{font-size:12.5px;padding:7px 13px}
 .sheetmeta .nowg{margin-top:6px;font-weight:700;color:var(--ink-2)}
@@ -1508,9 +1510,9 @@ h1{hyphens:auto;-webkit-hyphens:auto}
         "According to your rough estimate, the woody plants alone do not create an uplift. The measure sketch therefore proposes discussing an additional uplift of the crop area with the lower nature conservation authority.")+'</div>';
     h += '</div></div>';
     function card(titel, kenn, intern, text, knopf){
-      return '<div class="dlcard"><h4>'+titel+'</h4><div class="dlkenn'+(intern?' intern':'')+'">'+kenn+'</div><p>'+text+'</p>'+knopf+'</div>';
+      return '<div class="dlcard"><h4>'+titel+'</h4><div class="dlkenn'+(intern?' intern':'')+'">'+kenn+'</div><p>'+text+'</p><div class="dlbtn">'+knopf+'</div></div>';
     }
-    var st = '<span class="counter pdfstate"></span>';
+    var st = '';
     var btnTxt = T("PDF herunterladen","Download PDF");
     h += '<div class="dlgrid no-print">'+
       card(T("Überschlagsrechnung für Ihre Maßnahme","Rough-estimate calculation for your measure"), T("Intern, nicht zur Weitergabe","Internal, not for distribution"), true,
@@ -1522,7 +1524,7 @@ h1{hyphens:auto;-webkit-hyphens:auto}
       card(T("Methodenpapier (naturschutzfachliche Herleitung der Bewertungsbasis)","Method paper (nature conservation derivation of the assessment basis)"), T("zur Weitergabe","for distribution"), false,
         T("2 Seiten, mit Literatur.","2 pages, with references."),
         '<a class="btn small" href="methodenpapier.pdf" download="'+esc(T("Agroforst Methodenpapier.pdf","Agroforestry method paper.pdf"))+'">'+btnTxt+'</a>')+
-      '</div>';
+      '</div><div class="counter pdfstate dlstate no-print"></div>';
     return h;
   }
 
@@ -1966,10 +1968,9 @@ h1{hyphens:auto;-webkit-hyphens:auto}
     var rail = document.getElementById("rail");
     rail.innerHTML = "";
     steps().forEach(function(name,i){
-      var offen = (i<4 && i<=maxReached) ? hinweise(i).length : 0;
       var b = el("button",{class:"railitem", type:"button", "data-seen":(i<=maxReached?"1":"0"),
         "aria-current":(i===step?"true":"false")},
-        '<span class="b">'+(i===5?"✓":(i+1))+'</span><span class="t">'+name+'</span>'+(offen?'<span class="dot"></span>':''));
+        '<span class="b">'+(i===5?"✓":(i+1))+'</span><span class="t">'+name+'</span>');
       b.addEventListener("click", function(){ go(i); });
       rail.appendChild(b);
     });
